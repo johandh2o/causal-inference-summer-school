@@ -1,9 +1,9 @@
 ---
-title: Causal Inference Summer School
+title: Causality and Machine Learning
 layout: default
 ---
 
-# Causal Inference Summer School
+# Causality and Machine Learning - NORA Summer Research School 2026
 
 This site contains the materials for the causal inference summer school.
 
@@ -39,5 +39,5 @@ docs/
 │   └── css/
 │       └── style.scss
 └── notebooks/
-    └── day3_estimation.ipynb
+    └── day3_estimation_1.ipynb
 ```
