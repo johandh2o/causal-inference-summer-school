@@ -4,9 +4,9 @@ subtitle: NORA Summer Research School 2026
 layout: default
 ---
 
-# Causality and Machine Learning - NORA Summer Research School 2026
+# Causality and Machine Learning
 
-This site contains the materials for the causal inference summer school.
+This site contains the materials for the session on **Causal Estimation and Inference** (day 3) for the *NORA Summer Research School 2026* on **Causality and Machine Learning*.
 
 ## Available material
 
