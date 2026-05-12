@@ -19,6 +19,10 @@ This site contains the materials for the session about **Causal Estimation and I
 - van der Laan, M. J., & Rubin, D. (2006). [Targeted maximum likelihood learning](https://biostats.bepress.com/cgi/viewcontent.cgi?article=1214&context=ucbbiostat). The International Journal of Biostatistics, 2(1), Article 11. doi:10.2202/1557-4679.1043
 - Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018). [Double/debiased machine learning for treatment and structural parameters](https://academic.oup.com/ectj/article/21/1/C1/5056401). The Econometrics Journal, 21(1), C1–C68. doi:10.1111/ectj.12097
 
+## Available material
+
+- [Day 3: Estimation for causal effects](day3.html)
+
 ## Tutorials and resources
 
 - [Applied causal inference](https://appliedcausalinference.github.io/aci_book/01-intro-to-causality.html)
@@ -34,10 +38,6 @@ This site contains the materials for the session about **Causal Estimation and I
 - [Theory behind TMLE (CrossValidated)](https://stats.stackexchange.com/questions/442569/theory-behind-targeted-maximum-likelihood-estimation-tmle)
 - [EconML and CausalML](https://causal-machine-learning.github.io/kdd2021-tutorial/)
 - [The basics of double/debiased machine learning](https://docs.doubleml.org/stable/guide/basics.html)
-
-## Available material
-
-- [Day 3: Estimation for causal effects](day3.html)
 
 ## Computational setup
 
