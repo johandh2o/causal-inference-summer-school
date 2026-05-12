@@ -13,13 +13,27 @@ This site contains the materials for the session about **Causal Estimation and I
 - Funk, M. J., Westreich, D., Wiesen, C., Stürmer, T., Brookhart, M. A., & Davidian, M. (2011). [Doubly robust estimation of causal effects](https://academic.oup.com/aje/article/173/7/761/103691). American Journal of Epidemiology, 173(7), 761–767. doi:10.1093/aje/kwq439
 - **Optional**: Hernán, M. A., & Robins, J. M. (2020). [Causal inference: What if](https://static1.squarespace.com/static/675db8b0dd37046447128f5f/t/677676888e31cc50c2c33877/1735816881944/hernanrobins_WhatIf_2jan25.pdf) (**chapters: 1,3,7,12,13,15**). Chapman & Hall / CRC.
 
-## Advanced readings 
+## Advanced readings
 
-- Hola
+- Robins, J. M., Rotnitzky, A., & Zhao, L. P. (1994). [Estimation of regression coefficients when some regressors are not always observed](https://www.jstor.org/stable/2290910). Journal of the American Statistical Association, 89(427), 846–866. doi:10.1080/01621459.1994.10476818
+- van der Laan, M. J., & Rubin, D. (2006). [Targeted maximum likelihood learning](https://biostats.bepress.com/cgi/viewcontent.cgi?article=1214&context=ucbbiostat). The International Journal of Biostatistics, 2(1), Article 11. doi:10.2202/1557-4679.1043
+- Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018). [Double/debiased machine learning for treatment and structural parameters](https://academic.oup.com/ectj/article/21/1/C1/5056401). The Econometrics Journal, 21(1), C1–C68. doi:10.1111/ectj.12097
 
-## Tutorials
+## Tutorials and resources
 
-- Hola
+- [EconML and CausalML](https://causal-machine-learning.github.io/kdd2021-tutorial/)
+- [Applied causal inference](https://appliedcausalinference.github.io/aci_book/01-intro-to-causality.html)
+- [Causal Inference and Machine Learning](https://www.causalmlbook.com)
+- [Machine Learning-based Causal Inference](https://bookdown.org/stanfordgsbsilab/ml-ci-tutorial/)
+- [Applied Causal Inference Powered by ML and AI](https://github.com/CausalAIBook)
+- [Causal Inference for The Brave and True](https://matheusfacure.github.io/python-causality-handbook/landing-page.html)
+- [Awesome causal inference 1](https://github.com/matteocourthoud/awesome-causal-inference)
+- [Awesome causal inference 2](https://github.com/imirzadeh/awesome-causal-inference)
+- [Awesome causality](https://shubhanshu.com/awesome-causality/)
+- [An illustrated guide to TMLE](https://www.khstats.com/blog/tmle/tutorial)
+- [TMLE for binary outcome](https://migariane.github.io/TMLE.nb.html)
+- [Theory behind TMLE (CrossValidated)](https://stats.stackexchange.com/questions/442569/theory-behind-targeted-maximum-likelihood-estimation-tmle)
+- [The basics of double/debiased machine learning](https://docs.doubleml.org/stable/guide/basics.html)
 
 ## Available material
 
