@@ -1,0 +1,26 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+.markdown-body {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.markdown-body table {
+  display: table;
+  width: 100%;
+}
+
+.markdown-body code {
+  font-size: 0.95em;
+}
+
+.markdown-body .course-note {
+  border-left: 4px solid #0969da;
+  padding: 0.75rem 1rem;
+  background: #f6f8fa;
+  margin: 1rem 0;
+}

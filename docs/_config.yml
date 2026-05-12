@@ -1,0 +1,43 @@
+title: Causal Inference Summer School
+subtitle: Day 3 materials
+description: Course website for Day 3 of the causal inference summer school.
+theme: jekyll-theme-primer
+
+# GitHub Pages/Jekyll settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  math_engine: mathjax
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-relative-links
+  - jekyll-readme-index
+  - jekyll-default-layout
+  - jekyll-titles-from-headings
+
+relative_links:
+  enabled: true
+  collections: true
+
+readme_index:
+  enabled: true
+  remove_originals: false
+  with_frontmatter: false
+
+# Site navigation data used by the pages
+course:
+  day: 3
+  title: "Day 3: Estimation for Causal Effects"
+  language: "Python"
+
+# Keep the build light and avoid publishing local/cache files
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - .DS_Store
+  - README_local.md
