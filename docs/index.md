@@ -1,5 +1,6 @@
 ---
 title: Causality and Machine Learning
+subtitle: NORA Summer Research School 2026
 layout: default
 ---
 
