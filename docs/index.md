@@ -6,7 +6,7 @@ layout: default
 
 # Causality and Machine Learning
 
-This site contains the materials for the session on **Causal Estimation and Inference** (day 3) for the *NORA Summer Research School 2026* on **Causality and Machine Learning*.
+This site contains the materials for the session on **Causal Estimation and Inference (day 3)** for the *NORA Summer Research School 2026* on **Causality and Machine Learning**, given by [Johan de Aguas](https://johandh2o.github.io).
 
 ## Available material
 
