@@ -21,18 +21,18 @@ This site contains the materials for the session about **Causal Estimation and I
 
 ## Tutorials and resources
 
-- [EconML and CausalML](https://causal-machine-learning.github.io/kdd2021-tutorial/)
 - [Applied causal inference](https://appliedcausalinference.github.io/aci_book/01-intro-to-causality.html)
+- [Causal Inference for The Brave and True](https://matheusfacure.github.io/python-causality-handbook/landing-page.html)
 - [Causal Inference and Machine Learning](https://www.causalmlbook.com)
 - [Machine Learning-based Causal Inference](https://bookdown.org/stanfordgsbsilab/ml-ci-tutorial/)
 - [Applied Causal Inference Powered by ML and AI](https://github.com/CausalAIBook)
-- [Causal Inference for The Brave and True](https://matheusfacure.github.io/python-causality-handbook/landing-page.html)
 - [Awesome causal inference 1](https://github.com/matteocourthoud/awesome-causal-inference)
 - [Awesome causal inference 2](https://github.com/imirzadeh/awesome-causal-inference)
 - [Awesome causality](https://shubhanshu.com/awesome-causality/)
 - [An illustrated guide to TMLE](https://www.khstats.com/blog/tmle/tutorial)
 - [TMLE for binary outcome](https://migariane.github.io/TMLE.nb.html)
 - [Theory behind TMLE (CrossValidated)](https://stats.stackexchange.com/questions/442569/theory-behind-targeted-maximum-likelihood-estimation-tmle)
+- [EconML and CausalML](https://causal-machine-learning.github.io/kdd2021-tutorial/)
 - [The basics of double/debiased machine learning](https://docs.doubleml.org/stable/guide/basics.html)
 
 ## Available material
