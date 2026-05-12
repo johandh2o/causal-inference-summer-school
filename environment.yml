@@ -1,0 +1,23 @@
+name: causal-course
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - jupyterlab
+  - notebook
+  - ipykernel
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - statsmodels
+  - networkx
+  - pydot
+  - graphviz
+  - pip
+  - pip:
+      - pgmpy
+      - dowhy
+      - causal-learn
