@@ -1,6 +1,6 @@
 title: Causality and Machine Learning
-subtitle: Day 3 materials
-description: Course website for Day 3 of the causal inference summer school.
+subtitle: NORA Summer School
+description: Course website 
 theme: jekyll-theme-primer
 
 # GitHub Pages/Jekyll settings
@@ -28,7 +28,7 @@ readme_index:
 # Site navigation data used by the pages
 course:
   day: 3
-  title: "Day 3: Estimation for Causal Effects"
+  title: "Causality and Machine Learning"
   language: "Python"
 
 # Keep the build light and avoid publishing local/cache files

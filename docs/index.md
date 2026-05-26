@@ -136,6 +136,6 @@ For international students, a formal certificate granting the credits can be req
 
 Questions about the course, readings, computational setup, or final project can be directed to: <fabio.zennaro@uib.no>
 
-## Available materials
+## Available materials for Day 3
 
 - [Day 3: Estimation for causal effects](day3.html)
