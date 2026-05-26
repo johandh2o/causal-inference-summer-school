@@ -138,4 +138,4 @@ Questions about the course, readings, computational setup, or final project can 
 
 ## Available materials for Day 3
 
-- [Day 3: Estimation and causal inference]({{ "/day3.html" | relative_url }})
+- [Day 3: Estimation and causal inference](day3.html)

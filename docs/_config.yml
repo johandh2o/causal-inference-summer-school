@@ -1,8 +1,12 @@
-title: Causality and Machine Learning
-subtitle: NORA Summer School
-description: Course website
-theme: jekyll-theme-primer
+title: "Causality and Machine Learning"
+subtitle: "NORA Summer School"
+description: "Course website"
 
+url: "https://johandh2o.github.io"
+baseurl: "/causal-inference-summer-school"
+repository: "johandh2o/causal-inference-summer-school"
+
+theme: jekyll-theme-primer
 markdown: kramdown
 
 kramdown:
@@ -25,13 +29,17 @@ readme_index:
   remove_originals: false
   with_frontmatter: false
 
-# Site navigation data used by the pages
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
 course:
   day: 3
   title: "Causality and Machine Learning"
   language: "Python"
 
-# Keep the build light and avoid publishing local/cache files
 exclude:
   - Gemfile
   - Gemfile.lock
