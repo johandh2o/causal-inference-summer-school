@@ -9,7 +9,7 @@ causal question
 → causal estimand
 → identification assumptions
 → identifying functional
-→ estimator
+→ estimators
 → diagnostics and uncertainty
 ```
 
