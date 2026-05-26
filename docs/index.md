@@ -4,11 +4,60 @@ subtitle: NORA Summer Research School 2026
 layout: default
 ---
 
-# Causality and Machine Learning
+# Course description
 
-This site contains the materials for the session about **Causal Estimation and Inference (day 3)** for the *NORA Summer Research School 2026* on **Causality and Machine Learning**, given by [Johan de Aguas](https://johandh2o.github.io).
+The course is part of the [NORA Summer Research School 2026](https://www.nora.ai/nora-research-school/education-programs/summer-school/summer-school-2026/). **Causality and Machine Learning** introduces PhD candidates and researchers to foundational concepts and modern methods at the intersection of causality and machine learning. It is designed to bridge traditional causal inference, including potential outcomes, structural causal models, graphical reasoning, identification, and semiparametric estimation, with modern machine learning methodologies for flexible nuisance estimation, policy learning, and data-driven causal analysis.
 
-## Recommended readings 
+A central goal of the course is to help students formulate causal questions precisely, understand the assumptions required for identification, and implement estimation methods using modern computational tools. The course emphasizes both mathematical clarity and practical implementation
+
+**Format**: Lectures, guided examples, hands-on coding sessions, group discussion, and final project.
+
+**Credits**: 5
+
+**Instructors**
+
+- [Prof. Fabio Massimo Zennaro](https://www4.uib.no/en/find-employees/fabio-massimo.zennaro), Dept. of Informatics, University of Bergen.
+- [Prof. Pekka Parviainen](https://www4.uib.no/en/find-employees/pekka.parviainen), Dept. of Informatics, University of Bergen.
+- [Prof. Johan Pensar](https://www.mn.uio.no/math/english/people/aca/johanpen/), Statistics and Data Science (Dept. of Mathematics), University of Oslo.
+- [Johan de Aguas](https://johandh2o.github.io), Statistics and Data Science (Dept. of Mathematics), University of Oslo.
+
+# Learning objectives
+
+By the end of the course, students should be able to:
+
+- Represent probabilistic systems using graphical models, including nodes, edges, paths, parents, ancestors, descendants, and Markov properties.
+- Use d-separation and Bayesian network factorization to reason about conditional independence, prediction, and probabilistic modeling.
+- Interpret directed acyclic graphs as causal models and relate them to structural causal models, interventions, and potential outcomes.
+- Apply graphical criteria to reason about causal identification, including adjustment, backdoor paths, front-door intuition, selection bias, and transportability.
+- Formulate causal estimands and connect them to observed-data estimands that can be estimated from data.
+- Use statistical and machine learning methods for causal estimation, including outcome regression, IPW, AIPW, TMLE, DML, nuisance estimation, and cross-fitting.
+- Explain the goals, assumptions, and limitations of causal discovery from observational and interventional data.
+- Compare basic structure learning approaches, including constraint-based, score-based, and hybrid methods, while accounting for uncertainty and Markov equivalence.
+- Critically evaluate causal inference papers, empirical analyses, and simulation studies.
+- Communicate a causal analysis clearly in written and oral form.
+
+# Syllabus
+
+| Day | Topic | 
+|---:|---|
+| 1 | Probability theory and random variables | 
+| 1 | Graphs and conditional independence | 
+| 1 | Bayesian networks | Johan Pensar |
+| 1 | d-separation and I-equivalences | 
+| 2 | Pearl's causal hierarchy | 
+| 2 | Structural causal models | 
+| 2 | Identifiability of causal queries | 
+| 2 | Backdoor adjustment, confounders and selection bias | 
+| 3 | Potential outcomes and assumptions for identification | 
+| 3 | Causal estimands: ATE, ATT, CATE and policy effects | 
+| 3 | Classical estimation: outcome regression and IPW | 
+| 3 | Semiparametric estimation: AIPW, DML and TMLE | 
+| 4 | Where do causal models come from? Expert knowledge, RCTs, observational data | 
+| 4 | Constraint-based structure learning | 
+| 4 | Score-based structure learning | 
+| 4 | Learning beyond equivalence classes | 
+
+# Recommended readings 
 - Cinelli, C., Forney, A., & Pearl, J. (2024). [A crash course in good and bad controls](https://journals.sagepub.com/doi/full/10.1177/00491241221099552). Sociological Methods & Research, 53(3), 1071-1104. doi: 10.1177/0049124122109955
 - Funk, M. J., Westreich, D., Wiesen, C., Stürmer, T., Brookhart, M. A., & Davidian, M. (2011). [Doubly robust estimation of causal effects](https://academic.oup.com/aje/article/173/7/761/103691). American Journal of Epidemiology, 173(7), 761–767. doi:10.1093/aje/kwq439
 - **Optional**: Hernán, M. A., & Robins, J. M. (2020). [Causal inference: What if](https://static1.squarespace.com/static/675db8b0dd37046447128f5f/t/677676888e31cc50c2c33877/1735816881944/hernanrobins_WhatIf_2jan25.pdf) (**chapters: 1,3,7,12,13,15**). Chapman & Hall / CRC.
@@ -19,11 +68,15 @@ This site contains the materials for the session about **Causal Estimation and I
 - van der Laan, M. J., & Rubin, D. (2006). [Targeted maximum likelihood learning](https://biostats.bepress.com/cgi/viewcontent.cgi?article=1214&context=ucbbiostat). The International Journal of Biostatistics, 2(1), Article 11. doi:10.2202/1557-4679.1043
 - Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018). [Double/debiased machine learning for treatment and structural parameters](https://academic.oup.com/ectj/article/21/1/C1/5056401). The Econometrics Journal, 21(1), C1–C68. doi:10.1111/ectj.12097
 
-## Available material
+## Available materials
 
 - [Day 3: Estimation for causal effects](day3.html)
 
-## Tutorials and resources
+## Projects
+
+Hey
+
+## Tutorials, online books and resources
 
 - [Applied causal inference](https://appliedcausalinference.github.io/aci_book/01-intro-to-causality.html)
 - [Causal inference for the brave and true](https://matheusfacure.github.io/python-causality-handbook/landing-page.html)
@@ -41,31 +94,11 @@ This site contains the materials for the session about **Causal Estimation and I
 
 ## Computational setup
 
-For Day 3, students should have Python installed and be able to run Jupyter notebooks. The recommended minimal setup is:
+For day 3, students should have Python installed and be able to run Jupyter notebooks. The recommended minimal setup is:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install numpy pandas scipy scikit-learn matplotlib statsmodels jupyterlab
+pip install numpy pandas scipy scikit-learn matplotlib statsmodels jupyterlab marimo pgmpy
 jupyter lab
-```
-
-On Windows, replace the activation line with:
-
-```bash
-.venv\Scripts\activate
-```
-
-## Repository structure
-
-```text
-docs/
-├── _config.yml
-├── index.md
-├── day3.md
-├── assets/
-│   └── css/
-│       └── style.scss
-└── notebooks/
-    └── day3_estimation_1.ipynb
 ```

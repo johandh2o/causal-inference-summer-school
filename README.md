@@ -1,6 +1,6 @@
 # Causal Inference Course: Day 3 Materials
 
-This repository contains a minimal GitHub Pages website and a Jupyter notebook for **Day 3: Identification and Estimation of Causal Effects**.
+This repository contains a minimal GitHub Pages website and a Jupyter notebook for **Day 3: Estimation and Causal Inference**.
 
 The Day 3 session focuses on the workflow
 
