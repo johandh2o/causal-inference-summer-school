@@ -4,7 +4,7 @@ subtitle: NORA Summer Research School 2026
 layout: default
 ---
 
-# NORA Summer School 2026: Causality and Machine Learning:
+# NORA Summer School 2026: Causality and Machine Learning
 
 ## Course description
 
@@ -138,4 +138,4 @@ Questions about the course, readings, computational setup, or final project can 
 
 ## Available materials for Day 3
 
-- [Day 3: Estimation for causal effects](day3.html)
+- [Day 3: Estimation and causal inference](day3.html)
