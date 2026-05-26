@@ -4,9 +4,13 @@ subtitle: NORA Summer Research School 2026
 layout: default
 ---
 
-# Course description
+# NORA Summer Research School 2026: Causality and Machine Learning:
 
-The course is part of the [NORA Summer Research School 2026](https://www.nora.ai/nora-research-school/education-programs/summer-school/summer-school-2026/). **Causality and Machine Learning** introduces PhD candidates and researchers to foundational concepts and modern methods at the intersection of causality and machine learning. It is designed to bridge traditional causal inference, including potential outcomes, structural causal models, graphical reasoning, identification, and semiparametric estimation, with modern machine learning methodologies for flexible nuisance estimation, policy learning, and data-driven causal analysis.
+## Course description
+
+The course is part of the [NORA Summer Research School 2026](https://www.nora.ai/nora-research-school/education-programs/summer-school/summer-school-2026/). 
+
+**Causality and Machine Learning** introduces PhD candidates and researchers to foundational concepts and modern methods at the intersection of causality and machine learning. It is designed to bridge traditional causal inference, including potential outcomes, structural causal models, graphical reasoning, identification, and semiparametric estimation, with modern machine learning methodologies for flexible nuisance estimation, policy learning, and data-driven causal analysis.
 
 A central goal of the course is to help students formulate causal questions precisely, understand the assumptions required for identification, and implement estimation methods using modern computational tools. The course emphasizes both mathematical clarity and practical implementation
 
@@ -21,7 +25,7 @@ A central goal of the course is to help students formulate causal questions prec
 - [Prof. Johan Pensar](https://www.mn.uio.no/math/english/people/aca/johanpen/), Statistics and Data Science (Dept. of Mathematics), University of Oslo.
 - [Johan de Aguas](https://johandh2o.github.io), Statistics and Data Science (Dept. of Mathematics), University of Oslo.
 
-# Learning objectives
+## Learning objectives
 
 By the end of the course, students should be able to:
 
@@ -36,13 +40,13 @@ By the end of the course, students should be able to:
 - Critically evaluate causal inference papers, empirical analyses, and simulation studies.
 - Communicate a causal analysis clearly in written and oral form.
 
-# Syllabus
+## Syllabus
 
 | Day | Topic | 
 |---:|---|
 | 1 | Probability theory and random variables | 
 | 1 | Graphs and conditional independence | 
-| 1 | Bayesian networks | Johan Pensar |
+| 1 | Bayesian networks |
 | 1 | d-separation and I-equivalences | 
 | 2 | Pearl's causal hierarchy | 
 | 2 | Structural causal models | 
@@ -57,10 +61,35 @@ By the end of the course, students should be able to:
 | 4 | Score-based structure learning | 
 | 4 | Learning beyond equivalence classes | 
 
-# Recommended readings 
+## Recommended readings 
+
+Here is a list of references (including papers and textbooks) covering the topics presented at the summer school. You are invited to have a look at these sources to get a foundation of the ideas we will work on during the week.
+
+### Day 1: Probabilistic graphical models
+
+- Koller, D., & Friedman, N. (2009). [Probabilistic Graphical Models: Principles and Techniques](http://mcb111.org/w06/KollerFriedman.pdf) (**chapters 1-3**). MIT Press.
+
+### Day 2: Causal models
+
+- Peters, J., Janzing, D., & Scholkopf, B. (2017). [Elements of causal inference: foundations and learning algorithms](https://library.oapen.org/bitstream/handle/20.500.12657/26040/1/11283.pdf) (**chapters: 1-3**). MIT press.
+- **Optional**: Pearl, J. (2015). [Trygve Haavelmo and the emergence of causal calculus](https://ftp.cs.ucla.edu/pub/stat_ser/r391.pdf). Econometric Theory, 31(1), 152-179
+- **Optional**: Pearl, J. (2018). [Theoretical impediments to machine learning with seven sparks from the causal revolution](https://arxiv.org/pdf/1801.04016). arXiv preprint arXiv:1801.04016
+
+### Day 3: Estimation and causal inference
+
 - Cinelli, C., Forney, A., & Pearl, J. (2024). [A crash course in good and bad controls](https://journals.sagepub.com/doi/full/10.1177/00491241221099552). Sociological Methods & Research, 53(3), 1071-1104. doi: 10.1177/0049124122109955
 - Funk, M. J., Westreich, D., Wiesen, C., Stürmer, T., Brookhart, M. A., & Davidian, M. (2011). [Doubly robust estimation of causal effects](https://academic.oup.com/aje/article/173/7/761/103691). American Journal of Epidemiology, 173(7), 761–767. doi:10.1093/aje/kwq439
 - **Optional**: Hernán, M. A., & Robins, J. M. (2020). [Causal inference: What if](https://static1.squarespace.com/static/675db8b0dd37046447128f5f/t/677676888e31cc50c2c33877/1735816881944/hernanrobins_WhatIf_2jan25.pdf) (**chapters: 1,3,7,12,13,15**). Chapman & Hall / CRC.
+
+### Day 4: Causal discovery
+
+- Koller, D., & Friedman, N. (2009). [Probabilistic Graphical Models: Principles and Techniques](http://mcb111.org/w06/KollerFriedman.pdf) (**chapters 16-18,21**). MIT Press.
+
+
+
+
+
+
 
 ## Advanced readings
 
