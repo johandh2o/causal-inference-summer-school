@@ -1,10 +1,10 @@
 title: Causality and Machine Learning
 subtitle: NORA Summer School
-description: Course website 
+description: Course website
 theme: jekyll-theme-primer
 
-# GitHub Pages/Jekyll settings
 markdown: kramdown
+
 kramdown:
   input: GFM
   math_engine: mathjax
