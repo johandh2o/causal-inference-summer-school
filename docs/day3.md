@@ -25,16 +25,11 @@ By the end of this session, students should be able to:
 
 | Time | Topic | Format |
 |---:|---|---|
-| 09:00--09:30 | Recap: identification versus estimation | Lecture |
-| 09:30--10:30 | Outcome-regression and g-computation | Lecture + coding |
-| 10:30--10:45 | Break |  |
-| 10:45--11:45 | Propensity scores and inverse probability weighting | Lecture + coding |
-| 11:45--12:30 | Doubly robust estimation | Lecture |
-| 12:30--13:30 | Lunch |  |
-| 13:30--14:45 | Cross-fitting and flexible nuisance estimation | Coding lab |
-| 14:45--15:00 | Break |  |
-| 15:00--16:00 | Simulation study and diagnostics | Coding lab |
-| 16:00--16:30 | Discussion and wrap-up | Group discussion |
+| 10:00--10:50 | Introduction, formalisms and causal effects | Lecture |
+| 10:50--11:00 | 10 minute break | |
+| 11:00--11:30 | Common causal estimands | Lab  |
+| 11:30--11:50 | The causal workflow, identification | Lecture  |
+
 
 ## Advanced readings
 
@@ -44,9 +39,11 @@ By the end of this session, students should be able to:
 
 ## Notebooks
 
-The coding lab is available here:
+The coding labs are available here:
 
-- [Download/open the Day 3 estimation notebook]({{ "/notebooks/day3_estimation.ipynb" | relative_url }})
+- [Common causal estimands](https://molab.marimo.io/github/causal-inference-summer-school/blob/main/docs/marimo/causal_estimands_visual_simulation_marimo.py/wasm)
+- [Plug-in bias](https://molab.marimo.io/github/causal-inference-summer-school/blob/main/docs/marimo/ate_plugin_first_order_bias_marimo.py/wasm)
+
 
 ## Tutorials, online books and resources
 
