@@ -41,8 +41,8 @@ By the end of this session, students should be able to:
 
 The coding labs are available here:
 
-- [Common causal estimands](https://molab.marimo.io/github/causal-inference-summer-school/blob/main/docs/marimo/causal_estimands_visual_simulation_marimo.py/wasm)
-- [Plug-in bias](https://molab.marimo.io/github/causal-inference-summer-school/blob/main/docs/marimo/ate_plugin_first_order_bias_marimo.py/wasm)
+- [Common causal estimands](hhttps://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/causal_estimands_visual_simulation_marimo.py/wasm)
+- [Plug-in bias](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/ate_plugin_first_order_bias_marimo.py/wasm)
 
 
 ## Tutorials, online books and resources
