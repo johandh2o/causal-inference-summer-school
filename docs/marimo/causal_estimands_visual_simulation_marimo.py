@@ -1,14 +1,16 @@
 import marimo
 
-__generated_with = "0.19.7"
+__generated_with = "0.12.9"
 app = marimo.App(width="full")
 
 
 @app.cell
 def _():
     import marimo as mo
-
-    return (mo,)
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    return mo, np, pd, plt
 
 
 @app.cell(hide_code=True)
@@ -40,15 +42,6 @@ def _(mo):
         """
     )
     return
-
-
-@app.cell
-def _():
-    import numpy as np
-    import pandas as pd
-    import matplotlib.pyplot as plt
-
-    return np, pd, plt
 
 
 @app.cell(hide_code=True)
@@ -87,7 +80,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(np, pd):
     def expit(z):
         return 1.0 / (1.0 + np.exp(-z))
@@ -217,7 +210,13 @@ def _(np, pd):
         return pd.DataFrame(rows)
 
 
-    return continuous_cate_bins, estimand_summary, generate_population, smooth_density
+    return (
+        continuous_cate_bins,
+        estimand_summary,
+        expit,
+        generate_population,
+        smooth_density,
+    )
 
 
 @app.cell(hide_code=True)
@@ -236,7 +235,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     controls = mo.ui.dictionary(
         {
@@ -256,7 +255,7 @@ def _(mo):
     return (controls,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(controls, generate_population):
     values = controls.value
     data = generate_population(
@@ -274,7 +273,7 @@ def _(controls, generate_population):
     return data, values
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(data, pd):
     treatment_summary = pd.DataFrame(
         {
@@ -316,7 +315,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(data, np, plt):
     x_grid_assign = np.linspace(data["X"].quantile(0.01), data["X"].quantile(0.99), 80)
     fig_assign, ax_assign = plt.subplots(figsize=(8, 4.6))
@@ -337,7 +336,7 @@ def _(data, np, plt):
     fig_assign.tight_layout()
     fig_assign
 
-    return (fig_assign,)
+    return ax_assign, bins, fig_assign, g_value, grouped, tmp, x_grid_assign
 
 
 @app.cell(hide_code=True)
@@ -354,7 +353,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(data, np, plt, smooth_density):
     y_pool = data["Y"].to_numpy()
     y_left, y_right = np.quantile(y_pool, [0.005, 0.995])
@@ -371,7 +370,7 @@ def _(data, np, plt, smooth_density):
     fig_obs.tight_layout()
     fig_obs
 
-    return (fig_obs,)
+    return ax_obs, fig_obs, y_grid, y_left, y_pool, y_right
 
 
 @app.cell(hide_code=True)
@@ -397,7 +396,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(data, np, plt, smooth_density):
     pooled = np.concatenate(
         [
@@ -421,7 +420,7 @@ def _(data, np, plt, smooth_density):
     fig_do.tight_layout()
     fig_do
 
-    return (fig_do,)
+    return ax_do, fig_do, grid, left, pooled, right
 
 
 @app.cell(hide_code=True)
@@ -447,14 +446,14 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(data, estimand_summary):
     estimands = estimand_summary(data)
     estimands.round(3)
     return (estimands,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(estimands, plt):
     contrast_rows = estimands.iloc[[2, 3, 4, 5]].copy()
     labels = ["ATE", "ATT", "ATC", "observed\ncontrast"]
@@ -466,7 +465,7 @@ def _(estimands, plt):
     fig_estimands.tight_layout()
     fig_estimands
 
-    return (fig_estimands,)
+    return ax_estimands, contrast_rows, fig_estimands, labels
 
 
 @app.cell(hide_code=True)
@@ -488,7 +487,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(continuous_cate_bins, data, np, plt, values):
     cate_bins = continuous_cate_bins(data, n_bins=22)
     x_grid = np.linspace(data["X"].quantile(0.01), data["X"].quantile(0.99), 200)
@@ -506,7 +505,7 @@ def _(continuous_cate_bins, data, np, plt, values):
     fig_cate_x.tight_layout()
     fig_cate_x
 
-    return cate_bins, fig_cate_x
+    return ax_cate_x, cate_bins, cate_curve, fig_cate_x, x_grid
 
 
 @app.cell(hide_code=True)
@@ -527,8 +526,8 @@ def _(mo):
     return
 
 
-@app.cell
-def _(data, pd, plt):
+@app.cell(hide_code=True)
+def _(data, plt):
     cate_g = (
         data.groupby("G", observed=True)
         .agg(cate=("tau", "mean"), n=("tau", "size"), mean_x=("X", "mean"))
@@ -544,10 +543,10 @@ def _(data, pd, plt):
     fig_cate_g.tight_layout()
     fig_cate_g
 
-    return cate_g, fig_cate_g
+    return ax_cate_g, cate_g, fig_cate_g
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(cate_g):
     cate_g.round(3)
     return
