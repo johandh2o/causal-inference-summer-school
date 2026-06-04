@@ -25,10 +25,10 @@ By the end of this session, students should be able to:
 
 | Time | Topic | Format |
 |---:|---|---|
-| 10:00--10:50 | Introduction, formalisms and causal effects | Lecture |
-| 10:50--11:00 | 10 minute break | |
-| 11:00--11:30 | Common causal estimands | Lab  |
-| 11:30--11:50 | The causal workflow, identification | Lecture  |
+| 10:05--10:40 | Introduction, formalisms and causal effects | Lecture |
+| 10:40--11:00 | Common causal estimands | Simulation lab |
+| 11:00--11:10 | 10 minute break | |
+| 11:10--11:50 | The causal workflow, identification | Lecture  |
 
 
 ## Advanced readings
@@ -41,7 +41,7 @@ By the end of this session, students should be able to:
 
 The coding labs are available here:
 
-- [Common causal estimands](hhttps://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/causal_estimands_visual_simulation_marimo.py/wasm)
+- [Common causal estimands](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/causal_estimands_visual_simulation_marimo.py/wasm)
 - [Plug-in bias](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/ate_plugin_first_order_bias_marimo.py/wasm)
 
 
