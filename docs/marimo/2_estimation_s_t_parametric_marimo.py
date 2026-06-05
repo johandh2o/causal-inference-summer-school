@@ -6,6 +6,8 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
+    # Only basic packages are used.
+    # This keeps the notebook easy to install and easy to explain line by line.
     import marimo as mo
     import numpy as np
     import pandas as pd
@@ -35,14 +37,14 @@ def _(mo):
         The notebook compares three plug-in estimators:
 
         1. a deliberately rigid parametric regression;
-        2. an S-learner: one flexible outcome model $\widehat Q(W,A)$;
-        3. a T-learner: two flexible outcome models $\widehat Q_1(W)$ and $\widehat Q_0(W)$.
+        2. an S-learner: one outcome model $\widehat Q(W,A)$;
+        3. a T-learner: two outcome models $\widehat Q_1(W)$ and $\widehat Q_0(W)$.
 
-        For each estimator, we show:
-
-        - an ATE point estimate with a bootstrap confidence interval;
-        - a CATE curve $x\mapsto E[Y^1-Y^0\mid X=x]$ with pointwise bootstrap intervals;
-        - the true simulated values, because the potential outcomes are known in the simulation.
+        The data-generating process is designed so that you can create scenarios where the S-learner and
+        T-learner behave similarly, and scenarios where they behave very differently.  The key control is
+        **S-learner treatment interactions**.  When this is set to zero, the S-learner treats $A$ almost like
+        a single additive feature and can miss strong CATE heterogeneity.  When it is increased, the S-learner
+        is allowed to look more like a T-learner.
         """
     )
     return
@@ -70,18 +72,18 @@ def _(mo):
         A\mid W \sim \operatorname{Bernoulli}\{\pi(W)\}.
         $$
 
-        Increasing the **selection / lack-of-overlap strength** makes treatment more predictable from $W$.
-        That makes the treated and control groups less comparable and forces estimators to rely more on adjustment and extrapolation.
-
-        The treatment effect is heterogeneous:
+        The treatment effect is heterogeneous and can be highly nonlinear:
 
         $$
         Y^1-Y^0
         =
-        \tau_0+\tau_X X+\tau_{X^2}(X^2-1)+\tau_G G.
+        \tau_0+\tau_X X+\tau_{X^2}(X^2-1)+\tau_GG
+        +\lambda\{1.1\sin(2X)+0.7XG+0.55\sin(Z_1)\}.
         $$
 
-        Therefore the true CATE curve in $X$ is nonlinear whenever $\tau_{X^2}\neq 0$.
+        The parameter $\lambda$ is the **arm-specific CATE complexity**.  Increasing it makes the treated
+        outcome surface more different from the control outcome surface.  This is where T-learners can have
+        an advantage, provided there is enough data and enough overlap.
         """
     )
     return
@@ -89,117 +91,133 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(np, pd):
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
     # Small numerical utilities
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
 
     def expit(z):
-        """Numerically stable logistic transform."""
-        z = np.asarray(z)
-        return 1.0 / (1.0 + np.exp(-z))
+        """Logistic function: maps any real number to a probability."""
+        return 1.0 / (1.0 + np.exp(-np.asarray(z)))
 
 
     def as_vector(value, n):
-        """Return a length-n vector, whether value is already a vector or a scalar."""
+        """Turn a scalar into a length-n vector, or keep an array as an array."""
         if np.isscalar(value):
-            return np.full(n, float(value))
+            return np.full(int(n), float(value))
         return np.asarray(value, dtype=float)
 
 
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
     # Data simulation
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
 
     def generate_data(
         n,
         seed,
-        overlap_strength=1.25,
+        overlap_strength=1.50,
+        treatment_intercept=-0.30,
         baseline_nonlinearity=1.00,
         tau0=1.00,
-        tau_x=0.50,
-        tau_x2=0.30,
-        tau_g=0.50,
+        tau_x=0.90,
+        tau_x2=0.70,
+        tau_g=0.70,
+        arm_curve_strength=1.50,
         noise_sd=1.00,
     ):
         """
         Simulate one observational data set.
 
-        Important teaching point:
-        - The analyst observes only W, A, and Y.
-        - We keep Y0, Y1, and tau in the data only because this is a simulation,
-          so we can compare the estimators against the truth.
+        The analyst observes W, A, and Y.  We also store pi, Y0, Y1, and tau
+        because this is a teaching simulation and we want to compare estimators
+        with the truth.
         """
-        rng = np.random.default_rng(int(seed))
-        n = int(n)
+        _rng = np.random.default_rng(int(seed))
+        _n = int(n)
 
-        # Pre-treatment covariates.
-        # X is the focal continuous covariate for the CATE plot.
-        X = rng.normal(loc=0.0, scale=1.0, size=n)
-        Z1 = rng.normal(loc=0.0, scale=1.0, size=n)
-        Z2 = rng.normal(loc=0.0, scale=1.0, size=n)
-        G = rng.binomial(n=1, p=0.45, size=n)
+        # 1. Pre-treatment covariates.
+        # X is the focal variable for the CATE plot.
+        _X = _rng.normal(loc=0.0, scale=1.0, size=_n)
+        _Z1 = _rng.normal(loc=0.0, scale=1.0, size=_n)
+        _Z2 = _rng.normal(loc=0.0, scale=1.0, size=_n)
+        _G = _rng.binomial(n=1, p=0.45, size=_n)
 
-        # Propensity score: probability of naturally receiving treatment.
-        # Larger overlap_strength means stronger selection into treatment.
-        logit_pi = -0.10 + overlap_strength * (
-            0.85 * X - 0.75 * Z1 + 0.55 * np.sin(Z2) + 0.90 * (G - 0.45)
+        # 2. Treatment assignment.
+        # The overlap_strength slider controls how strongly W predicts A.
+        # Larger values mean worse overlap and more extrapolation.
+        _selection_score = (
+            0.90 * _X
+            - 0.85 * _Z1
+            + 0.75 * np.sin(_Z2)
+            + 1.00 * (_G - 0.45)
+            + 0.25 * _X * _G
         )
-        pi = np.clip(expit(logit_pi), 0.02, 0.98)
-        A = rng.binomial(n=1, p=pi)
+        _logit_pi = treatment_intercept + overlap_strength * _selection_score
+        _pi = np.clip(expit(_logit_pi), 0.02, 0.98)
+        _A = _rng.binomial(n=1, p=_pi)
 
-        # Baseline outcome under control.
-        # This is intentionally nonlinear, so a main-effects linear regression is misspecified.
-        nonlinear_part = (
-            1.10 * np.sin(X)
-            + 0.45 * (X**2 - 1.0)
-            + 0.50 * np.cos(Z2)
-            + 0.35 * X * G
+        # 3. Baseline outcome under control, Y^0.
+        # It is nonlinear, so a main-effects linear regression is misspecified.
+        _linear_part = 0.65 * _Z1 - 0.35 * _Z2 + 0.60 * _G
+        _nonlinear_part = (
+            1.20 * np.sin(_X)
+            + 0.50 * (_X**2 - 1.0)
+            + 0.45 * np.cos(_Z2)
+            + 0.35 * _X * _G
+            + 0.25 * (_Z1**2 - 1.0)
         )
-        linear_part = 0.80 * Z1 + 0.65 * G - 0.35 * Z2
-        mu0 = 0.20 + baseline_nonlinearity * nonlinear_part + linear_part
+        _mu0 = 0.20 + _linear_part + baseline_nonlinearity * _nonlinear_part
 
-        # Individual treatment effect.
-        tau = tau0 + tau_x * X + tau_x2 * (X**2 - 1.0) + tau_g * G
+        # 4. Individual treatment effect tau(W).
+        # The last line creates a genuinely arm-specific nonlinear shape.
+        # This is the part that makes S- and T-learners separate in some regimes.
+        _tau = (
+            tau0
+            + tau_x * _X
+            + tau_x2 * (_X**2 - 1.0)
+            + tau_g * _G
+            + arm_curve_strength
+            * (1.10 * np.sin(2.0 * _X) + 0.70 * _X * _G + 0.55 * np.sin(_Z1))
+        )
 
-        # Potential outcomes and observed outcome.
-        epsilon = rng.normal(loc=0.0, scale=noise_sd, size=n)
-        Y0 = mu0 + epsilon
-        Y1 = Y0 + tau
-        Y = A * Y1 + (1 - A) * Y0
+        # 5. Potential outcomes and observed outcome.
+        _epsilon = _rng.normal(loc=0.0, scale=noise_sd, size=_n)
+        _Y0 = _mu0 + _epsilon
+        _Y1 = _Y0 + _tau
+        _Y = _A * _Y1 + (1 - _A) * _Y0
 
         return pd.DataFrame(
             {
-                "X": X,
-                "Z1": Z1,
-                "Z2": Z2,
-                "G": G,
-                "pi": pi,
-                "A": A,
-                "Y": Y,
-                "Y0": Y0,
-                "Y1": Y1,
-                "tau": tau,
+                "X": _X,
+                "Z1": _Z1,
+                "Z2": _Z2,
+                "G": _G,
+                "pi": _pi,
+                "A": _A,
+                "Y": _Y,
+                "Y0": _Y0,
+                "Y1": _Y1,
+                "tau": _tau,
             }
         )
 
 
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
     # Design matrices for outcome regression
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
 
     def covariate_arrays(data, x_override=None):
         """
         Extract covariates as numpy arrays.
 
-        x_override is useful for CATE curves: we set X=x for everyone,
-        while keeping the empirical distribution of Z1, Z2, and G fixed.
+        x_override is used for the CATE curve: we set X=x for everyone,
+        while keeping the observed Z1, Z2, and G distribution fixed.
         """
-        n = len(data)
-        X = as_vector(data["X"].to_numpy() if x_override is None else x_override, n)
-        Z1 = data["Z1"].to_numpy()
-        Z2 = data["Z2"].to_numpy()
-        G = data["G"].to_numpy()
-        return X, Z1, Z2, G
+        _n = len(data)
+        _X = as_vector(data["X"].to_numpy() if x_override is None else x_override, _n)
+        _Z1 = data["Z1"].to_numpy()
+        _Z2 = data["Z2"].to_numpy()
+        _G = data["G"].to_numpy()
+        return _X, _Z1, _Z2, _G
 
 
     def linear_design(data, a, x_override=None):
@@ -209,258 +227,313 @@ def _(np, pd):
         This model is intentionally simple:
             Y ~ 1 + A + X + Z1 + Z2 + G
 
-        It omits nonlinearities and treatment-effect interactions, so it is generally
-        misspecified for the simulated data-generating process.
+        It omits nonlinearities and treatment-effect interactions.
         """
-        X, Z1, Z2, G = covariate_arrays(data, x_override=x_override)
-        A = as_vector(a, len(data))
-        return np.column_stack([np.ones(len(data)), A, X, Z1, Z2, G])
+        _X, _Z1, _Z2, _G = covariate_arrays(data, x_override=x_override)
+        _A = as_vector(a, len(data))
+        return np.column_stack([np.ones(len(data)), _A, _X, _Z1, _Z2, _G])
 
 
     def flexible_w_basis(data, x_override=None):
         """
-        A simple hand-built nonlinear basis for W.
+        Hand-built nonlinear basis for W.
 
-        This plays the role of a transparent ML feature map.
-        It includes nonlinear transformations and interactions, but avoids any
-        external dependency such as scikit-learn.
+        This plays the role of a transparent ML feature map.  It includes the
+        nonlinear terms used by the data-generating process, but it is still
+        simple enough to explain to students.
         """
-        X, Z1, Z2, G = covariate_arrays(data, x_override=x_override)
+        _X, _Z1, _Z2, _G = covariate_arrays(data, x_override=x_override)
         return np.column_stack(
             [
                 np.ones(len(data)),
-                X,
-                Z1,
-                Z2,
-                G,
-                X**2 - 1.0,
-                Z1**2 - 1.0,
-                Z2**2 - 1.0,
-                X * Z1,
-                X * G,
-                Z1 * G,
-                np.sin(X),
-                np.cos(Z2),
+                _X,
+                _Z1,
+                _Z2,
+                _G,
+                _X**2 - 1.0,
+                _Z1**2 - 1.0,
+                _Z2**2 - 1.0,
+                _X * _Z1,
+                _X * _G,
+                _Z1 * _G,
+                _Z2 * _G,
+                np.sin(_X),
+                np.sin(2.0 * _X),
+                np.cos(_Z2),
+                np.sin(_Z1),
             ]
         )
 
 
-    def s_learner_design(data, a, x_override=None):
+    def s_learner_design(data, a, x_override=None, interaction_level=0):
         """
-        Flexible design matrix for the S-learner.
+        Design matrix for the S-learner.
 
-        The S-learner fits one regression surface Q(W,A).  We include both
-        baseline terms in W and treatment-by-W interactions.  This lets the
-        single model represent heterogeneous treatment effects.
+        The S-learner always fits one regression surface.  The interaction_level
+        slider controls how much the single surface is allowed to use treatment:
+
+        level 0: baseline basis + A only;
+        level 1: baseline basis + A, A*X, A*G;
+        level 2: baseline basis + richer treatment interactions.
+
+        Level 0 makes the classic weakness visible: the model may use A only as
+        a small additive feature and therefore miss heterogeneous effects.
         """
-        basis = flexible_w_basis(data, x_override=x_override)
-        A = as_vector(a, len(data))
-        return np.column_stack([basis, A[:, None] * basis])
+        _basis = flexible_w_basis(data, x_override=x_override)
+        _X, _Z1, _Z2, _G = covariate_arrays(data, x_override=x_override)
+        _A = as_vector(a, len(data))
+        _level = int(interaction_level)
+
+        if _level <= 0:
+            _effect_columns = _A[:, None]
+        elif _level == 1:
+            _effect_columns = np.column_stack([_A, _A * _X, _A * _G])
+        else:
+            _effect_basis = np.column_stack(
+                [
+                    np.ones(len(data)),
+                    _X,
+                    _G,
+                    _X**2 - 1.0,
+                    _X * _G,
+                    np.sin(2.0 * _X),
+                    np.sin(_Z1),
+                ]
+            )
+            _effect_columns = _A[:, None] * _effect_basis
+
+        return np.column_stack([_basis, _effect_columns])
 
 
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
     # Ridge regression fitting and prediction
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
 
     def fit_ridge(design, outcome, penalty):
         """
         Fit ridge regression by solving the normal equations.
 
-        The intercept is not penalized.  This is not meant to be a production
-        implementation; it is written explicitly so students can see the estimator.
+        The intercept is not penalized.  The function is deliberately explicit
+        rather than optimized, so students can see the estimator.
         """
-        X = np.asarray(design, dtype=float)
-        y = np.asarray(outcome, dtype=float)
+        _X = np.asarray(design, dtype=float)
+        _y = np.asarray(outcome, dtype=float)
+        _penalty = float(penalty)
 
-        ridge_matrix = np.eye(X.shape[1])
-        ridge_matrix[0, 0] = 0.0
+        _ridge_matrix = np.eye(_X.shape[1])
+        _ridge_matrix[0, 0] = 0.0
 
-        lhs = X.T @ X + float(penalty) * ridge_matrix
-        rhs = X.T @ y
-        return np.linalg.solve(lhs, rhs)
+        _lhs = _X.T @ _X + _penalty * _ridge_matrix
+        _rhs = _X.T @ _y
+
+        try:
+            return np.linalg.solve(_lhs, _rhs)
+        except np.linalg.LinAlgError:
+            return np.linalg.lstsq(_lhs, _rhs, rcond=None)[0]
 
 
     def predict(design, beta):
-        """Linear prediction for a fitted regression coefficient vector."""
+        """Linear prediction for a fitted coefficient vector."""
         return np.asarray(design, dtype=float) @ np.asarray(beta, dtype=float)
 
 
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
     # Three plug-in learners
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
 
     def fit_parametric_plugin(data):
         """Fit the deliberately misspecified main-effects linear regression."""
-        design = linear_design(data, a=data["A"].to_numpy())
-        beta = fit_ridge(design, data["Y"].to_numpy(), penalty=1e-8)
-        return {"name": "Parametric", "beta": beta}
+        _design = linear_design(data, a=data["A"].to_numpy())
+        _beta = fit_ridge(_design, data["Y"].to_numpy(), penalty=1e-8)
+        return {"name": "Parametric", "beta": _beta}
 
 
-    def fit_s_learner(data, penalty):
-        """Fit one flexible outcome model Q(W,A)."""
-        design = s_learner_design(data, a=data["A"].to_numpy())
-        beta = fit_ridge(design, data["Y"].to_numpy(), penalty=penalty)
-        return {"name": "S-learner", "beta": beta}
+    def fit_s_learner(data, penalty, interaction_level):
+        """Fit one outcome model Q(W,A)."""
+        _design = s_learner_design(
+            data,
+            a=data["A"].to_numpy(),
+            interaction_level=interaction_level,
+        )
+        _beta = fit_ridge(_design, data["Y"].to_numpy(), penalty=penalty)
+        return {"name": "S-learner", "beta": _beta, "interaction_level": int(interaction_level)}
 
 
     def fit_t_learner(data, penalty):
-        """Fit separate flexible outcome models in the treated and control arms."""
-        treated = data[data["A"] == 1]
-        control = data[data["A"] == 0]
+        """Fit separate outcome models in the treated and control arms."""
+        _treated_data = data[data["A"] == 1]
+        _control_data = data[data["A"] == 0]
 
-        beta1 = fit_ridge(
-            flexible_w_basis(treated),
-            treated["Y"].to_numpy(),
+        _beta1 = fit_ridge(
+            flexible_w_basis(_treated_data),
+            _treated_data["Y"].to_numpy(),
             penalty=penalty,
         )
-        beta0 = fit_ridge(
-            flexible_w_basis(control),
-            control["Y"].to_numpy(),
+        _beta0 = fit_ridge(
+            flexible_w_basis(_control_data),
+            _control_data["Y"].to_numpy(),
             penalty=penalty,
         )
-        return {"name": "T-learner", "beta1": beta1, "beta0": beta0}
+        return {"name": "T-learner", "beta1": _beta1, "beta0": _beta0}
 
 
     def predict_under_treatment(model, data, a, x_override=None):
-        """Predict E[Y | W, do(A=a)] using one fitted plug-in model."""
+        """Predict the outcome under the intervention do(A=a)."""
         if model["name"] == "Parametric":
             return predict(linear_design(data, a=a, x_override=x_override), model["beta"])
 
         if model["name"] == "S-learner":
-            return predict(s_learner_design(data, a=a, x_override=x_override), model["beta"])
+            return predict(
+                s_learner_design(
+                    data,
+                    a=a,
+                    x_override=x_override,
+                    interaction_level=model["interaction_level"],
+                ),
+                model["beta"],
+            )
 
         if model["name"] == "T-learner":
+            _basis = flexible_w_basis(data, x_override=x_override)
             if int(a) == 1:
-                return predict(flexible_w_basis(data, x_override=x_override), model["beta1"])
-            return predict(flexible_w_basis(data, x_override=x_override), model["beta0"])
+                return predict(_basis, model["beta1"])
+            return predict(_basis, model["beta0"])
 
         raise ValueError(f"Unknown model type: {model['name']}")
 
 
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
     # ATE and CATE estimation
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
 
     def estimate_ate(model, data):
         """
         Plug-in ATE estimate.
 
-        For every observed covariate vector W_i, predict the outcome twice:
-        once under A=1 and once under A=0.  Then average the differences.
+        For every W_i, predict twice: once under A=1 and once under A=0.
+        Then average the predicted differences.
         """
-        q1 = predict_under_treatment(model, data, a=1)
-        q0 = predict_under_treatment(model, data, a=0)
-        return float(np.mean(q1 - q0))
+        _q1 = predict_under_treatment(model, data, a=1)
+        _q0 = predict_under_treatment(model, data, a=0)
+        return float(np.mean(_q1 - _q0))
 
 
     def estimate_cate_curve(model, data, x_grid):
         """
         Estimate the marginal CATE curve in X.
 
-        For each x on the grid, set X=x for everyone, keep Z1,Z2,G as observed,
-        predict Q(1,x,Z1,Z2,G)-Q(0,x,Z1,Z2,G), and average over Z1,Z2,G.
+        At each x, set X=x for everyone, keep Z1,Z2,G as observed, predict the
+        contrast Q(1,x,Z1,Z2,G)-Q(0,x,Z1,Z2,G), and average over Z1,Z2,G.
         """
-        curve = []
-        for x_value in x_grid:
-            q1 = predict_under_treatment(model, data, a=1, x_override=x_value)
-            q0 = predict_under_treatment(model, data, a=0, x_override=x_value)
-            curve.append(np.mean(q1 - q0))
-        return np.asarray(curve)
+        _curve = []
+        for _x_value in x_grid:
+            _q1 = predict_under_treatment(model, data, a=1, x_override=_x_value)
+            _q0 = predict_under_treatment(model, data, a=0, x_override=_x_value)
+            _curve.append(np.mean(_q1 - _q0))
+        return np.asarray(_curve)
 
 
     def true_ate(data):
-        """True finite-sample ATE, available only because this is a simulation."""
+        """True finite-sample ATE, available only in the simulation."""
         return float(data["tau"].mean())
 
 
-    def true_cate_curve(data, x_grid, tau0, tau_x, tau_x2, tau_g):
+    def true_cate_curve(data, x_grid, tau0, tau_x, tau_x2, tau_g, arm_curve_strength):
         """
-        True CATE curve marginalized over Z1,Z2,G.
+        True finite-sample CATE curve marginalized over Z1,Z2,G.
 
-        The simulated tau depends only on X and G, so for each fixed x we average
-        tau0 + tau_x*x + tau_x2*(x^2-1) + tau_g*G_i over the empirical G_i values.
+        The DGP makes tau depend on X, G, and Z1.  For each fixed x, we average
+        over the empirical distribution of G and Z1.
         """
-        mean_g = float(data["G"].mean())
-        return tau0 + tau_x * x_grid + tau_x2 * (x_grid**2 - 1.0) + tau_g * mean_g
+        _mean_g = float(data["G"].mean())
+        _mean_sin_z1 = float(np.sin(data["Z1"]).mean())
+        return (
+            tau0
+            + tau_x * x_grid
+            + tau_x2 * (x_grid**2 - 1.0)
+            + tau_g * _mean_g
+            + arm_curve_strength * (1.10 * np.sin(2.0 * x_grid) + 0.70 * x_grid * _mean_g + 0.55 * _mean_sin_z1)
+        )
 
 
-    def fit_and_evaluate_all(data, x_grid, ridge_penalty):
+    def fit_and_evaluate_all(data, x_grid, ridge_penalty, s_interaction_level):
         """Fit all three estimators and return their ATEs and CATE curves."""
-        models = [
+        _models = [
             fit_parametric_plugin(data),
-            fit_s_learner(data, penalty=ridge_penalty),
+            fit_s_learner(data, penalty=ridge_penalty, interaction_level=s_interaction_level),
             fit_t_learner(data, penalty=ridge_penalty),
         ]
 
-        ate_rows = []
-        cate_curves = {}
-        for model in models:
-            name = model["name"]
-            ate_rows.append({"estimator": name, "estimate": estimate_ate(model, data)})
-            cate_curves[name] = estimate_cate_curve(model, data, x_grid)
+        _ate_rows = []
+        _cate_curves = {}
+        for _model in _models:
+            _name = _model["name"]
+            _ate_rows.append({"estimator": _name, "estimate": estimate_ate(_model, data)})
+            _cate_curves[_name] = estimate_cate_curve(_model, data, x_grid)
 
-        return pd.DataFrame(ate_rows), cate_curves
+        return pd.DataFrame(_ate_rows), _cate_curves
 
 
-    def bootstrap_intervals(data, x_grid, ridge_penalty, n_boot, seed):
+    def bootstrap_intervals(data, x_grid, ridge_penalty, s_interaction_level, n_boot, seed):
         """
         Nonparametric bootstrap intervals.
 
         These are simple percentile intervals.  For the CATE curves they are
         pointwise intervals, not simultaneous confidence bands.
         """
-        n_boot = int(n_boot)
-        if n_boot <= 0:
-            empty_ate = pd.DataFrame(columns=["estimator", "lower", "upper"])
-            empty_curves = {}
-            return empty_ate, empty_curves
+        _n_boot = int(n_boot)
+        if _n_boot <= 0:
+            _empty_ate = pd.DataFrame(columns=["estimator", "lower", "upper"])
+            return _empty_ate, {}
 
-        rng = np.random.default_rng(int(seed) + 10_000)
-        n = len(data)
-        names = ["Parametric", "S-learner", "T-learner"]
+        _rng = np.random.default_rng(int(seed) + 10_000)
+        _n = len(data)
+        _names = ["Parametric", "S-learner", "T-learner"]
+        _ate_samples = {_name: [] for _name in _names}
+        _curve_samples = {_name: [] for _name in _names}
 
-        ate_samples = {name: [] for name in names}
-        curve_samples = {name: [] for name in names}
+        for _ in range(_n_boot):
+            _sample_ids = _rng.integers(low=0, high=_n, size=_n)
+            _boot_data = data.iloc[_sample_ids].reset_index(drop=True)
 
-        for _ in range(n_boot):
-            sample_ids = rng.integers(low=0, high=n, size=n)
-            boot_data = data.iloc[sample_ids].reset_index(drop=True)
-
-            boot_ate, boot_curves = fit_and_evaluate_all(
-                boot_data,
+            _boot_ate, _boot_curves = fit_and_evaluate_all(
+                _boot_data,
                 x_grid=x_grid,
                 ridge_penalty=ridge_penalty,
+                s_interaction_level=s_interaction_level,
             )
 
-            for name in names:
-                value = boot_ate.loc[boot_ate["estimator"] == name, "estimate"].iloc[0]
-                ate_samples[name].append(value)
-                curve_samples[name].append(boot_curves[name])
+            for _name in _names:
+                _value = _boot_ate.loc[_boot_ate["estimator"] == _name, "estimate"].iloc[0]
+                _ate_samples[_name].append(_value)
+                _curve_samples[_name].append(_boot_curves[_name])
 
-        ate_rows = []
-        curve_intervals = {}
-        for name in names:
-            ate_array = np.asarray(ate_samples[name])
-            ate_rows.append(
+        _ate_rows = []
+        _curve_intervals = {}
+        for _name in _names:
+            _ate_array = np.asarray(_ate_samples[_name])
+            _ate_rows.append(
                 {
-                    "estimator": name,
-                    "lower": np.quantile(ate_array, 0.025),
-                    "upper": np.quantile(ate_array, 0.975),
+                    "estimator": _name,
+                    "lower": np.quantile(_ate_array, 0.025),
+                    "upper": np.quantile(_ate_array, 0.975),
                 }
             )
 
-            curve_array = np.vstack(curve_samples[name])
-            curve_intervals[name] = {
-                "lower": np.quantile(curve_array, 0.025, axis=0),
-                "upper": np.quantile(curve_array, 0.975, axis=0),
+            _curve_array = np.vstack(_curve_samples[_name])
+            _curve_intervals[_name] = {
+                "lower": np.quantile(_curve_array, 0.025, axis=0),
+                "upper": np.quantile(_curve_array, 0.975, axis=0),
             }
 
-        return pd.DataFrame(ate_rows), curve_intervals
+        return pd.DataFrame(_ate_rows), _curve_intervals
 
 
     def treatment_summary(data):
         """Compact table showing treatment imbalance and overlap."""
-        pi = data["pi"]
+        _treated = data["A"] == 1
+        _control = data["A"] == 0
+        _pi = data["pi"]
         return pd.DataFrame(
             {
                 "quantity": [
@@ -477,15 +550,15 @@ def _(np, pd):
                 ],
                 "value": [
                     data["A"].mean(),
-                    data.loc[data["A"] == 1, "X"].mean(),
-                    data.loc[data["A"] == 0, "X"].mean(),
-                    data.loc[data["A"] == 1, "Z1"].mean(),
-                    data.loc[data["A"] == 0, "Z1"].mean(),
-                    data.loc[data["A"] == 1, "G"].mean(),
-                    data.loc[data["A"] == 0, "G"].mean(),
-                    pi.quantile(0.10),
-                    pi.quantile(0.90),
-                    ((pi > 0.1) & (pi < 0.9)).mean(),
+                    data.loc[_treated, "X"].mean(),
+                    data.loc[_control, "X"].mean(),
+                    data.loc[_treated, "Z1"].mean(),
+                    data.loc[_control, "Z1"].mean(),
+                    data.loc[_treated, "G"].mean(),
+                    data.loc[_control, "G"].mean(),
+                    _pi.quantile(0.10),
+                    _pi.quantile(0.90),
+                    ((_pi > 0.1) & (_pi < 0.9)).mean(),
                 ],
             }
         )
@@ -493,23 +566,23 @@ def _(np, pd):
 
     def bin_means(x, y, n_bins=18):
         """Compute binned means for simple diagnostic plots."""
-        edges = np.quantile(x, np.linspace(0, 1, n_bins + 1))
-        edges[0] -= 1e-8
-        edges[-1] += 1e-8
-        bin_id = np.digitize(x, edges) - 1
+        _edges = np.quantile(x, np.linspace(0, 1, n_bins + 1))
+        _edges[0] -= 1e-8
+        _edges[-1] += 1e-8
+        _bin_id = np.digitize(x, _edges) - 1
 
-        rows = []
-        for j in range(n_bins):
-            in_bin = bin_id == j
-            if in_bin.sum() > 0:
-                rows.append(
+        _rows = []
+        for _j in range(n_bins):
+            _in_bin = _bin_id == _j
+            if _in_bin.sum() > 0:
+                _rows.append(
                     {
-                        "x_mean": np.mean(x[in_bin]),
-                        "y_mean": np.mean(y[in_bin]),
-                        "n": int(in_bin.sum()),
+                        "x_mean": np.mean(x[_in_bin]),
+                        "y_mean": np.mean(y[_in_bin]),
+                        "n": int(_in_bin.sum()),
                     }
                 )
-        return pd.DataFrame(rows)
+        return pd.DataFrame(_rows)
 
 
     return (
@@ -534,10 +607,11 @@ def _(mo):
 
         Useful classroom exercises:
 
-        1. set treatment-effect heterogeneity close to zero and compare the ATE and CATE plots;
-        2. increase heterogeneity in $X$ and watch the parametric model fail to recover the CATE curve;
-        3. increase lack of overlap and watch the intervals widen, especially for the T-learner;
-        4. increase baseline nonlinearity and see how misspecified adjustment can bias the parametric estimator.
+        1. **Make S and T different:** set S-learner treatment interactions to 0, increase arm-specific CATE complexity,
+           and increase nonlinear heterogeneity.
+        2. **Make S and T similar:** set S-learner treatment interactions to 2 and keep overlap reasonable.
+        3. **Make T unstable:** reduce sample size and increase selection / lack-of-overlap strength.
+        4. **Make the parametric model fail:** increase baseline nonlinearity and nonlinear treatment-effect heterogeneity.
         """
     )
     return
@@ -545,25 +619,33 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    controls = mo.ui.dictionary(
+    # Every slider controls one feature of the simulation or estimation method.
+    est_controls = mo.ui.dictionary(
         {
             "n": mo.ui.slider(
-                start=500,
+                start=400,
                 stop=10_000,
-                step=500,
-                value=2_500,
+                step=200,
+                value=2_000,
                 label="sample size",
             ),
             "overlap_strength": mo.ui.slider(
                 start=0.0,
-                stop=3.0,
+                stop=4.0,
                 step=0.05,
-                value=1.25,
+                value=1.50,
                 label="selection / lack-of-overlap strength",
+            ),
+            "treatment_intercept": mo.ui.slider(
+                start=-2.0,
+                stop=2.0,
+                step=0.05,
+                value=-0.30,
+                label="treatment intercept / treatment prevalence",
             ),
             "baseline_nonlinearity": mo.ui.slider(
                 start=0.0,
-                stop=2.0,
+                stop=2.5,
                 step=0.05,
                 value=1.00,
                 label="baseline outcome nonlinearity",
@@ -576,25 +658,39 @@ def _(mo):
                 label="baseline treatment effect tau_0",
             ),
             "tau_x": mo.ui.slider(
-                start=-1.5,
-                stop=1.5,
+                start=-2.0,
+                stop=2.0,
                 step=0.05,
-                value=0.50,
+                value=0.90,
                 label="linear heterogeneity tau_X",
             ),
             "tau_x2": mo.ui.slider(
-                start=-1.0,
-                stop=1.0,
+                start=-1.5,
+                stop=1.5,
                 step=0.05,
-                value=0.30,
+                value=0.70,
                 label="nonlinear heterogeneity tau_X2",
             ),
             "tau_g": mo.ui.slider(
                 start=-1.0,
-                stop=1.5,
+                stop=2.0,
                 step=0.05,
-                value=0.50,
+                value=0.70,
                 label="group heterogeneity tau_G",
+            ),
+            "arm_curve_strength": mo.ui.slider(
+                start=0.0,
+                stop=2.5,
+                step=0.05,
+                value=1.50,
+                label="arm-specific CATE complexity lambda",
+            ),
+            "s_interaction_level": mo.ui.slider(
+                start=0,
+                stop=2,
+                step=1,
+                value=0,
+                label="S-learner treatment interactions: 0 none, 1 simple, 2 rich",
             ),
             "noise_sd": mo.ui.slider(
                 start=0.25,
@@ -605,7 +701,7 @@ def _(mo):
             ),
             "ridge_penalty": mo.ui.slider(
                 start=0.0,
-                stop=20.0,
+                stop=30.0,
                 step=0.25,
                 value=2.00,
                 label="ridge penalty for S/T learners",
@@ -626,33 +722,38 @@ def _(mo):
         },
         label="Simulation controls",
     )
-    controls.vstack()
-    return (controls,)
+    est_controls.vstack()
+    return (est_controls,)
 
 
 @app.cell(hide_code=True)
-def _(controls, generate_data):
-    values = controls.value
+def _(est_controls, generate_data):
+    # Read current slider values.
+    est_values = est_controls.value
 
-    data = generate_data(
-        n=int(values["n"]),
-        seed=int(values["seed"]),
-        overlap_strength=float(values["overlap_strength"]),
-        baseline_nonlinearity=float(values["baseline_nonlinearity"]),
-        tau0=float(values["tau0"]),
-        tau_x=float(values["tau_x"]),
-        tau_x2=float(values["tau_x2"]),
-        tau_g=float(values["tau_g"]),
-        noise_sd=float(values["noise_sd"]),
+    # Generate a new data set whenever a slider changes.
+    est_data = generate_data(
+        n=int(est_values["n"]),
+        seed=int(est_values["seed"]),
+        overlap_strength=float(est_values["overlap_strength"]),
+        treatment_intercept=float(est_values["treatment_intercept"]),
+        baseline_nonlinearity=float(est_values["baseline_nonlinearity"]),
+        tau0=float(est_values["tau0"]),
+        tau_x=float(est_values["tau_x"]),
+        tau_x2=float(est_values["tau_x2"]),
+        tau_g=float(est_values["tau_g"]),
+        arm_curve_strength=float(est_values["arm_curve_strength"]),
+        noise_sd=float(est_values["noise_sd"]),
     )
 
-    data.head()
-    return data, values
+    # Display the first few rows so students see the variables.
+    est_data.head()
+    return est_data, est_values
 
 
 @app.cell(hide_code=True)
-def _(data, treatment_summary):
-    overlap_table = treatment_summary(data)
+def _(est_data, treatment_summary):
+    overlap_table = treatment_summary(est_data)
     overlap_table.round(3)
     return (overlap_table,)
 
@@ -675,34 +776,33 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(bin_means, data, plt):
-    # Plot the empirical treatment probability as a function of the focal covariate X.
-    # The two curves correspond to the two levels of G.
-    fig_overlap, ax_overlap = plt.subplots(figsize=(8, 4.8))
+def _(bin_means, est_data, plt):
+    # Plot empirical treatment probability against X, separately by G.
+    _fig, _ax = plt.subplots(figsize=(8, 4.8))
 
-    for g_value in [0, 1]:
-        group_data = data[data["G"] == g_value]
-        binned = bin_means(
-            group_data["X"].to_numpy(),
-            group_data["A"].to_numpy(),
+    for _g_value in [0, 1]:
+        _group_data = est_data[est_data["G"] == _g_value]
+        _binned = bin_means(
+            _group_data["X"].to_numpy(),
+            _group_data["A"].to_numpy(),
             n_bins=16,
         )
-        ax_overlap.plot(
-            binned["x_mean"],
-            binned["y_mean"],
+        _ax.plot(
+            _binned["x_mean"],
+            _binned["y_mean"],
             marker="o",
-            label=f"G={g_value}",
+            label=f"G={_g_value}",
         )
 
-    ax_overlap.set_ylim(-0.02, 1.02)
-    ax_overlap.set_xlabel("continuous covariate X")
-    ax_overlap.set_ylabel("empirical Pr(A=1 | X bin, G)")
-    ax_overlap.set_title("Treatment selection as a function of pre-treatment covariates")
-    ax_overlap.legend(title="group")
-    fig_overlap.tight_layout()
-    fig_overlap
+    _ax.set_ylim(-0.02, 1.02)
+    _ax.set_xlabel("continuous covariate X")
+    _ax.set_ylabel("empirical Pr(A=1 | X bin, G)")
+    _ax.set_title("Treatment selection as a function of pre-treatment covariates")
+    _ax.legend(title="group")
+    _fig.tight_layout()
+    _fig
 
-    return (fig_overlap,)
+    return
 
 
 @app.cell(hide_code=True)
@@ -729,9 +829,10 @@ def _(mo):
         Y \sim 1 + A + X + Z_1 + Z_2 + G.
         $$
 
-        **S-learner:** fit one flexible regression surface $\widehat Q(W,A)$ using nonlinear basis terms and treatment interactions.
+        **S-learner:** fit one regression surface $\widehat Q(W,A)$.  The interaction slider controls whether
+        treatment enters only as $A$, as $A$ plus simple interactions, or with richer treatment interactions.
 
-        **T-learner:** fit two flexible regression surfaces: one among treated observations and one among controls.
+        **T-learner:** fit two regression surfaces: one among treated observations and one among controls.
         """
     )
     return
@@ -740,50 +841,56 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(
     bootstrap_intervals,
-    data,
+    est_data,
+    est_values,
     fit_and_evaluate_all,
     np,
     pd,
     true_ate,
     true_cate_curve,
-    values,
 ):
-    # The CATE curve is evaluated on a central grid of X values.
-    # We avoid extreme tails because all estimators become unstable there.
-    x_left, x_right = np.quantile(data["X"], [0.02, 0.98])
-    x_grid = np.linspace(x_left, x_right, 75)
+    # Evaluate the CATE curve on the central part of the X distribution.
+    _x_left, _x_right = np.quantile(est_data["X"], [0.02, 0.98])
+    x_grid = np.linspace(_x_left, _x_right, 80)
 
-    # Fit the three plug-in estimators on the observed data.
+    # Fit the three estimators on the observed data.
     ate_estimates, cate_estimates = fit_and_evaluate_all(
-        data,
+        est_data,
         x_grid=x_grid,
-        ridge_penalty=float(values["ridge_penalty"]),
+        ridge_penalty=float(est_values["ridge_penalty"]),
+        s_interaction_level=int(est_values["s_interaction_level"]),
     )
 
-    # Compute true values from the simulated potential outcomes.
-    ate_truth = true_ate(data)
+    # Compute the true finite-sample ATE and CATE curve.
+    ate_truth = true_ate(est_data)
     cate_truth = true_cate_curve(
-        data,
+        est_data,
         x_grid=x_grid,
-        tau0=float(values["tau0"]),
-        tau_x=float(values["tau_x"]),
-        tau_x2=float(values["tau_x2"]),
-        tau_g=float(values["tau_g"]),
+        tau0=float(est_values["tau0"]),
+        tau_x=float(est_values["tau_x"]),
+        tau_x2=float(est_values["tau_x2"]),
+        tau_g=float(est_values["tau_g"]),
+        arm_curve_strength=float(est_values["arm_curve_strength"]),
     )
 
-    # Bootstrap intervals.  Set bootstrap repetitions to 0 to turn this off.
+    # Bootstrap intervals.  Set n_boot to 0 to turn this off.
     ate_ci, cate_ci = bootstrap_intervals(
-        data,
+        est_data,
         x_grid=x_grid,
-        ridge_penalty=float(values["ridge_penalty"]),
-        n_boot=int(values["n_boot"]),
-        seed=int(values["seed"]),
+        ridge_penalty=float(est_values["ridge_penalty"]),
+        s_interaction_level=int(est_values["s_interaction_level"]),
+        n_boot=int(est_values["n_boot"]),
+        seed=int(est_values["seed"]),
     )
 
-    # Merge point estimates, truth, bias, and intervals into one table.
+    # Merge point estimates, truth, bias, bootstrap intervals, and CATE RMSE.
     ate_table = ate_estimates.copy()
     ate_table["truth"] = ate_truth
     ate_table["bias"] = ate_table["estimate"] - ate_truth
+    ate_table["CATE RMSE"] = [
+        np.sqrt(np.mean((cate_estimates[_estimator] - cate_truth) ** 2))
+        for _estimator in ate_table["estimator"]
+    ]
 
     if len(ate_ci) > 0:
         ate_table = ate_table.merge(ate_ci, on="estimator", how="left")
@@ -791,16 +898,18 @@ def _(
         ate_table["lower"] = pd.NA
         ate_table["upper"] = pd.NA
 
-    ate_table = ate_table[["estimator", "estimate", "truth", "bias", "lower", "upper"]]
+    ate_table = ate_table[
+        ["estimator", "estimate", "truth", "bias", "CATE RMSE", "lower", "upper"]
+    ]
 
     return ate_ci, ate_estimates, ate_table, ate_truth, cate_ci, cate_estimates, cate_truth, x_grid
 
 
 @app.cell(hide_code=True)
-def _(mo, values):
-    ci_text = (
+def _(est_values, mo):
+    _ci_text = (
         "Bootstrap intervals are enabled."
-        if int(values["n_boot"]) > 0
+        if int(est_values["n_boot"]) > 0
         else "Bootstrap intervals are turned off. Increase bootstrap repetitions to show intervals."
     )
 
@@ -823,7 +932,8 @@ def _(mo, values):
         \{{\widehat Q(W_i,1)-\widehat Q(W_i,0)\}}.
         $$
 
-        {ci_text}  The intervals are simple percentile bootstrap intervals.
+        {_ci_text}  The intervals are simple percentile bootstrap intervals.  The table also reports
+        CATE RMSE against the true curve, which helps quantify differences between S- and T-learners.
         """
     )
     return
@@ -837,31 +947,38 @@ def _(ate_table):
 
 @app.cell(hide_code=True)
 def _(ate_table, ate_truth, np, plt):
-    fig_ate, ax_ate = plt.subplots(figsize=(8, 4.8))
+    _fig, _ax = plt.subplots(figsize=(8, 4.8))
 
-    labels = ate_table["estimator"].tolist()
-    estimates = ate_table["estimate"].to_numpy(dtype=float)
-    positions = np.arange(len(labels))
+    _labels = ate_table["estimator"].tolist()
+    _estimates = ate_table["estimate"].to_numpy(dtype=float)
+    _positions = np.arange(len(_labels))
 
-    has_intervals = ate_table["lower"].notna().all()
-    if has_intervals:
-        lower = ate_table["lower"].to_numpy(dtype=float)
-        upper = ate_table["upper"].to_numpy(dtype=float)
-        yerr = np.vstack([estimates - lower, upper - estimates])
-        ax_ate.errorbar(positions, estimates, yerr=yerr, fmt="o", capsize=5, label="estimate with 95% CI")
+    _has_intervals = ate_table["lower"].notna().all()
+    if _has_intervals:
+        _lower = ate_table["lower"].to_numpy(dtype=float)
+        _upper = ate_table["upper"].to_numpy(dtype=float)
+        _yerr = np.vstack([_estimates - _lower, _upper - _estimates])
+        _ax.errorbar(
+            _positions,
+            _estimates,
+            yerr=_yerr,
+            fmt="o",
+            capsize=5,
+            label="estimate with 95% CI",
+        )
     else:
-        ax_ate.plot(positions, estimates, marker="o", linestyle="", label="estimate")
+        _ax.plot(_positions, _estimates, marker="o", linestyle="", label="estimate")
 
-    ax_ate.axhline(ate_truth, linewidth=2, linestyle="--", label="true ATE")
-    ax_ate.set_xticks(positions)
-    ax_ate.set_xticklabels(labels)
-    ax_ate.set_ylabel("ATE")
-    ax_ate.set_title("ATE: point estimates and bootstrap intervals")
-    ax_ate.legend()
-    fig_ate.tight_layout()
-    fig_ate
+    _ax.axhline(ate_truth, linewidth=2, linestyle="--", label="true ATE")
+    _ax.set_xticks(_positions)
+    _ax.set_xticklabels(_labels)
+    _ax.set_ylabel("ATE")
+    _ax.set_title("ATE: point estimates and bootstrap intervals")
+    _ax.legend()
+    _fig.tight_layout()
+    _fig
 
-    return (fig_ate,)
+    return
 
 
 @app.cell(hide_code=True)
@@ -886,57 +1003,58 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(cate_ci, cate_estimates, cate_truth, plt, values, x_grid):
-    fig_cate, ax_cate = plt.subplots(figsize=(9, 5.2))
+def _(cate_ci, cate_estimates, cate_truth, est_values, plt, x_grid):
+    _fig, _ax = plt.subplots(figsize=(9, 5.2))
 
-    ax_cate.plot(x_grid, cate_truth, linewidth=2.8, linestyle="--", label="true CATE(x)")
+    _ax.plot(x_grid, cate_truth, linewidth=2.8, linestyle="--", label="true CATE(x)")
 
-    for name, curve in cate_estimates.items():
-        ax_cate.plot(x_grid, curve, linewidth=2.0, label=name)
+    for _name, _curve in cate_estimates.items():
+        _ax.plot(x_grid, _curve, linewidth=2.0, label=_name)
 
-        if int(values["n_boot"]) > 0 and name in cate_ci:
-            ax_cate.fill_between(
+        if int(est_values["n_boot"]) > 0 and _name in cate_ci:
+            _ax.fill_between(
                 x_grid,
-                cate_ci[name]["lower"],
-                cate_ci[name]["upper"],
+                cate_ci[_name]["lower"],
+                cate_ci[_name]["upper"],
                 alpha=0.16,
             )
 
-    ax_cate.set_xlabel("continuous covariate X")
-    ax_cate.set_ylabel("CATE(x)")
-    ax_cate.set_title("CATE curve: truth, estimates, and pointwise intervals")
-    ax_cate.legend()
-    fig_cate.tight_layout()
-    fig_cate
+    _ax.set_xlabel("continuous covariate X")
+    _ax.set_ylabel("CATE(x)")
+    _ax.set_title("CATE curve: truth, estimates, and pointwise intervals")
+    _ax.legend()
+    _fig.tight_layout()
+    _fig
 
-    return (fig_cate,)
+    return
 
 
 @app.cell(hide_code=True)
-def _(ate_table, mo, np, values):
+def _(ate_table, est_values, mo, np):
     # A small automatic interpretation of the current run.
-    abs_bias = ate_table.assign(abs_bias=lambda d: np.abs(d["bias"].astype(float)))
-    best_row = abs_bias.sort_values("abs_bias").iloc[0]
-    worst_row = abs_bias.sort_values("abs_bias").iloc[-1]
+    _abs_bias = ate_table.assign(abs_bias=lambda _d: np.abs(_d["bias"].astype(float)))
+    _best_row = _abs_bias.sort_values("abs_bias").iloc[0]
+    _worst_row = _abs_bias.sort_values("abs_bias").iloc[-1]
+    _best_cate_row = ate_table.sort_values("CATE RMSE").iloc[0]
 
     mo.md(
         rf"""
         ## Current-run interpretation
 
-        In this run, the smallest absolute ATE bias is from **{best_row['estimator']}**,
-        while the largest absolute ATE bias is from **{worst_row['estimator']}**.
+        In this run, the smallest absolute ATE bias is from **{_best_row['estimator']}**,
+        while the largest absolute ATE bias is from **{_worst_row['estimator']}**.
+        The smallest CATE RMSE is from **{_best_cate_row['estimator']}**.
 
-        Parameter settings driving the difficulty:
+        Settings driving S- versus T-learner differences:
 
-        - selection / lack-of-overlap strength: **{float(values['overlap_strength']):.2f}**;
-        - baseline outcome nonlinearity: **{float(values['baseline_nonlinearity']):.2f}**;
-        - linear CATE heterogeneity $\tau_X$: **{float(values['tau_x']):.2f}**;
-        - nonlinear CATE heterogeneity $\tau_{{X^2}}$: **{float(values['tau_x2']):.2f}**.
+        - S-learner treatment interactions: **{int(est_values['s_interaction_level'])}**;
+        - arm-specific CATE complexity $\lambda$: **{float(est_values['arm_curve_strength']):.2f}**;
+        - selection / lack-of-overlap strength: **{float(est_values['overlap_strength']):.2f}**;
+        - nonlinear heterogeneity $\tau_{{X^2}}$: **{float(est_values['tau_x2']):.2f}**.
 
-        The parametric estimator is expected to struggle when the baseline outcome is nonlinear
-        or when the true CATE curve is not approximately flat.  The T-learner can represent more
-        heterogeneity, but it may become unstable when overlap is poor because each regression is
-        trained on only one treatment arm.
+        A good way to make the S-learner and T-learner separate is to set interaction level to 0,
+        increase $\lambda$, and keep enough sample size for the T-learner to fit each treatment arm.
+        A good way to make them similar is to set interaction level to 2.
         """
     ).callout(kind="info")
     return
@@ -950,8 +1068,8 @@ def _(mo):
 
         - Identification gives the formula $E\{Q(W,1)-Q(W,0)\}$, but estimation still requires learning $Q$.
         - A rigid parametric regression can be biased if the outcome surface or treatment-effect heterogeneity is misspecified.
-        - The S-learner uses all observations in one regression, which can make it stable, but it depends on how well the single model uses $A$ and its interactions.
-        - The T-learner is more flexible for heterogeneous effects, but each model sees only one treatment arm, so it can be unstable under imbalance or poor overlap.
+        - The S-learner uses one regression.  This can be stable, but if treatment enters too weakly, it can shrink heterogeneous effects toward a flat effect.
+        - The T-learner fits one regression per arm.  This can recover arm-specific outcome surfaces, but it uses fewer observations per regression and can be unstable under imbalance or poor overlap.
         - Pointwise CATE intervals are uncertainty intervals at each value of $x$ separately; they should not be read as simultaneous bands for the whole curve.
         """
     ).callout(kind="success")
@@ -968,13 +1086,13 @@ def _(mo):
 
         ```bash
         pip install marimo numpy pandas matplotlib
-        marimo edit 2_estimation_s_t_parametric_marimo.py
+        marimo edit 2_estimation_s_t_parametric_marimo_more_contrast.py
         ```
 
         To serve it as an app instead of opening the notebook editor:
 
         ```bash
-        marimo run 2_estimation_s_t_parametric_marimo.py
+        marimo run 2_estimation_s_t_parametric_marimo_more_contrast.py
         ```
         """
     )

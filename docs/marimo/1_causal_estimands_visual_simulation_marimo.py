@@ -216,17 +216,17 @@ def _(np, pd):
     def estimand_summary(data):
         """Compute the main causal estimands and one non-causal contrast."""
 
-        treated = data["A"] == 1
-        controls = data["A"] == 0
+        _treated_mask = data["A"] == 1
+        _control_mask = data["A"] == 0
 
         e_y0 = data["Y0"].mean()
         e_y1 = data["Y1"].mean()
         ate = data["tau"].mean()
-        att = data.loc[treated, "tau"].mean()
-        atc = data.loc[controls, "tau"].mean()
+        att = data.loc[_treated_mask, "tau"].mean()
+        atc = data.loc[_control_mask, "tau"].mean()
 
         # This contrast is generally biased for the ATE in observational data.
-        naive = data.loc[treated, "Y"].mean() - data.loc[controls, "Y"].mean()
+        naive = data.loc[_treated_mask, "Y"].mean() - data.loc[_control_mask, "Y"].mean()
 
         rows = [
             (r"$E[Y^0]$", e_y0),
@@ -397,17 +397,17 @@ def _(controls, generate_population):
 @app.cell(hide_code=True)
 def _(data, pd):
     # Masks make the summaries below easier to read.
-    treated = data["A"] == 1
-    controls = data["A"] == 0
+    _treated_mask = data["A"] == 1
+    _control_mask = data["A"] == 0
 
     rows = [
         ("Pr(A=1)", data["A"].mean()),
         ("mean X", data["X"].mean()),
-        ("mean X among treated", data.loc[treated, "X"].mean()),
-        ("mean X among controls", data.loc[controls, "X"].mean()),
+        ("mean X among treated", data.loc[_treated_mask, "X"].mean()),
+        ("mean X among controls", data.loc[_control_mask, "X"].mean()),
         ("Pr(G=1)", data["G"].mean()),
-        ("Pr(G=1 among treated)", data.loc[treated, "G"].mean()),
-        ("Pr(G=1 among controls)", data.loc[controls, "G"].mean()),
+        ("Pr(G=1 among treated)", data.loc[_treated_mask, "G"].mean()),
+        ("Pr(G=1 among controls)", data.loc[_control_mask, "G"].mean()),
     ]
 
     treatment_summary = pd.DataFrame(rows, columns=["quantity", "value"])
@@ -486,17 +486,17 @@ def _(data, np, plt, smooth_density):
     y_left, y_right = np.quantile(data["Y"], [0.005, 0.995])
     y_grid = np.linspace(y_left, y_right, 360)
 
-    treated = data["A"] == 1
-    controls = data["A"] == 0
+    _treated_mask = data["A"] == 1
+    _control_mask = data["A"] == 0
 
     density_y = smooth_density(data["Y"], y_grid)
-    density_y_a0 = smooth_density(data.loc[controls, "Y"], y_grid)
-    density_y_a1 = smooth_density(data.loc[treated, "Y"], y_grid)
+    _density_y_a0_obs = smooth_density(data.loc[_control_mask, "Y"], y_grid)
+    _density_y_a1_obs = smooth_density(data.loc[_treated_mask, "Y"], y_grid)
 
     fig_obs, ax_obs = plt.subplots(figsize=(8, 4.8))
     ax_obs.plot(y_grid, density_y, linewidth=2.4, label="marginal P(Y)")
-    ax_obs.plot(y_grid, density_y_a0, label="conditional P(Y | A=0)")
-    ax_obs.plot(y_grid, density_y_a1, label="conditional P(Y | A=1)")
+    ax_obs.plot(y_grid, _density_y_a0_obs, label="conditional P(Y | A=0)")
+    ax_obs.plot(y_grid, _density_y_a1_obs, label="conditional P(Y | A=1)")
     ax_obs.set_xlabel("outcome value y")
     ax_obs.set_ylabel("density")
     ax_obs.set_title("Observed distributions: marginal vs conditional")
@@ -543,13 +543,13 @@ def _(data, np, plt, smooth_density):
     left, right = np.quantile(all_outcomes, [0.005, 0.995])
     grid = np.linspace(left, right, 380)
 
-    treated = data["A"] == 1
-    controls = data["A"] == 0
+    _treated_mask = data["A"] == 1
+    _control_mask = data["A"] == 0
 
     density_y0 = smooth_density(data["Y0"], grid)
     density_y1 = smooth_density(data["Y1"], grid)
-    density_y_a0 = smooth_density(data.loc[controls, "Y"], grid)
-    density_y_a1 = smooth_density(data.loc[treated, "Y"], grid)
+    _density_y_a0_do = smooth_density(data.loc[_control_mask, "Y"], grid)
+    _density_y_a1_do = smooth_density(data.loc[_treated_mask, "Y"], grid)
 
     fig_do, ax_do = plt.subplots(figsize=(8.5, 5.0))
     ax_do.plot(
@@ -566,13 +566,13 @@ def _(data, np, plt, smooth_density):
     )
     ax_do.plot(
         grid,
-        density_y_a0,
+        _density_y_a0_do,
         linestyle="--",
         label="observed P(Y | A=0)",
     )
     ax_do.plot(
         grid,
-        density_y_a1,
+        _density_y_a1_do,
         linestyle="--",
         label="observed P(Y | A=1)",
     )
