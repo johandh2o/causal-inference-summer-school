@@ -6,6 +6,9 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
+    # These are the only packages used in the notebook.
+    # marimo builds the app, numpy simulates arrays, pandas stores tables,
+    # and matplotlib makes the plots.
     import marimo as mo
     import numpy as np
     import pandas as pd
@@ -83,6 +86,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(np, pd):
     def expit(z):
+        """Logistic function: turns any real number into a probability."""
         return 1.0 / (1.0 + np.exp(-z))
 
 
@@ -97,35 +101,58 @@ def _(np, pd):
         treatment_intercept=-0.15,
         noise_sd=1.00,
     ):
-        """Generate one finite super-population with observed and potential outcomes."""
+        """Simulate observed data and the two potential outcomes for each unit."""
+
+        # The random number generator makes the simulation reproducible.
         rng = np.random.default_rng(int(seed))
+        n = int(n)
 
-        X = rng.normal(loc=0.0, scale=1.0, size=int(n))
-        G = rng.binomial(n=1, p=0.45, size=int(n))
+        # 1. Pre-treatment covariates.
+        # X is continuous and G is binary. Both are generated before treatment.
+        X = rng.normal(loc=0.0, scale=1.0, size=n)
+        G = rng.binomial(n=1, p=0.45, size=n)
 
-        # Treatment assignment. Increasing confounding_strength makes A more selected by X and G.
-        logit_pi = (
-            treatment_intercept
-            + confounding_strength * (0.90 * X + 0.85 * (G - 0.45))
-        )
-        pi = np.clip(expit(logit_pi), 0.02, 0.98)
+        # 2. Treatment assignment.
+        # The treatment probability depends on X and G. When the slider
+        # confounding_strength is zero, treatment is almost random with respect
+        # to X and G. When it is positive, treated and untreated people differ.
+        selection_score = 0.90 * X + 0.85 * (G - 0.45)
+        logit_pi = treatment_intercept + confounding_strength * selection_score
+        pi = expit(logit_pi)
+
+        # Keep probabilities away from exactly 0 and 1. This is not essential
+        # for the plots, but it avoids tiny treatment groups at extreme settings.
+        pi = np.clip(pi, 0.02, 0.98)
         A = rng.binomial(n=1, p=pi)
 
-        # Outcome mechanism. X and G affect both treatment and outcome when confounding_strength > 0.
+        # 3. Baseline potential outcome Y^0.
+        # This is the outcome each unit would have under A=0.
+        linear_x_part = 0.90 * X
+        nonlinear_x_part = 0.30 * (X**2 - 1.0)
+        group_part = 0.70 * G
+        smooth_x_part = 0.25 * np.sin(1.5 * X)
+
         mu0 = (
             0.20
-            + baseline_x_strength * (0.90 * X + 0.30 * (X**2 - 1.0))
-            + 0.70 * G
-            + 0.25 * np.sin(1.5 * X)
+            + baseline_x_strength * (linear_x_part + nonlinear_x_part)
+            + group_part
+            + smooth_x_part
         )
+        epsilon = rng.normal(loc=0.0, scale=noise_sd, size=n)
+        Y0 = mu0 + epsilon
+
+        # 4. Individual treatment effect tau(X,G).
+        # If tau_x or tau_g is nonzero, treatment effects are heterogeneous.
         tau = tau0 + tau_x * X + tau_g * G
 
-        epsilon = rng.normal(loc=0.0, scale=noise_sd, size=int(n))
-        Y0 = mu0 + epsilon
+        # 5. Treated potential outcome Y^1 and observed outcome Y.
+        # We observe Y^1 only if A=1 and Y^0 only if A=0.
         Y1 = Y0 + tau
         Y = A * Y1 + (1 - A) * Y0
 
-        data = pd.DataFrame(
+        # Store everything in one table. In real data, Y0 and Y1 are not both
+        # observed, but here we keep them because this is a teaching simulation.
+        return pd.DataFrame(
             {
                 "X": X,
                 "G": G,
@@ -138,75 +165,108 @@ def _(np, pd):
                 "mu0": mu0,
             }
         )
-        return data
 
 
     def smooth_density(values, grid, bins=170):
-        """Fast smoothed histogram density; avoids extra dependencies beyond numpy."""
+        """Approximate a smooth density curve using only numpy.
+
+        The idea is simple:
+        1. make a histogram of the values;
+        2. smooth the histogram with a Gaussian-shaped kernel;
+        3. interpolate the smoothed histogram on the requested plotting grid.
+        """
+
         values = np.asarray(values)
         values = values[np.isfinite(values)]
+
         if len(values) < 5:
             return np.zeros_like(grid)
 
-        left, right = float(np.min(grid)), float(np.max(grid))
-        hist, edges = np.histogram(values, bins=bins, range=(left, right), density=False)
-        bin_width = edges[1] - edges[0]
+        grid_left = float(np.min(grid))
+        grid_right = float(np.max(grid))
 
-        sd = np.std(values)
-        bandwidth = max(1.06 * sd * (len(values) ** (-1 / 5)), 1.5 * bin_width)
+        counts, edges = np.histogram(
+            values,
+            bins=bins,
+            range=(grid_left, grid_right),
+            density=False,
+        )
+        bin_width = edges[1] - edges[0]
+        centers = 0.5 * (edges[:-1] + edges[1:])
+
+        # Silverman's rule gives a reasonable automatic bandwidth.
+        sample_sd = np.std(values)
+        bandwidth = 1.06 * sample_sd * (len(values) ** (-1 / 5))
+        bandwidth = max(bandwidth, 1.5 * bin_width)
+
+        # Convert the bandwidth from outcome units into histogram-bin units.
         sigma_bins = max(bandwidth / bin_width, 1.0)
         radius = int(np.ceil(4.0 * sigma_bins))
+
         offsets = np.arange(-radius, radius + 1)
         kernel = np.exp(-0.5 * (offsets / sigma_bins) ** 2)
         kernel = kernel / kernel.sum()
 
-        smoothed = np.convolve(hist, kernel, mode="same")
-        density_at_centers = smoothed / (len(values) * bin_width)
-        centers = 0.5 * (edges[:-1] + edges[1:])
-        return np.interp(grid, centers, density_at_centers, left=0.0, right=0.0)
+        smoothed_counts = np.convolve(counts, kernel, mode="same")
+        density = smoothed_counts / (len(values) * bin_width)
+
+        return np.interp(grid, centers, density, left=0.0, right=0.0)
 
 
     def estimand_summary(data):
-        ate = data["tau"].mean()
-        att = data.loc[data["A"] == 1, "tau"].mean()
-        atc = data.loc[data["A"] == 0, "tau"].mean()
+        """Compute the main causal estimands and one non-causal contrast."""
+
+        treated = data["A"] == 1
+        controls = data["A"] == 0
+
         e_y0 = data["Y0"].mean()
         e_y1 = data["Y1"].mean()
-        naive = data.loc[data["A"] == 1, "Y"].mean() - data.loc[data["A"] == 0, "Y"].mean()
+        ate = data["tau"].mean()
+        att = data.loc[treated, "tau"].mean()
+        atc = data.loc[controls, "tau"].mean()
 
-        return pd.DataFrame(
-            {
-                "estimand or contrast": [
-                    r"$E[Y^0]$",
-                    r"$E[Y^1]$",
-                    r"ATE $=E[Y^1-Y^0]$",
-                    r"ATT $=E[Y^1-Y^0\mid A=1]$",
-                    r"ATC $=E[Y^1-Y^0\mid A=0]$",
-                    r"Observed contrast $E[Y\mid A=1]-E[Y\mid A=0]$",
-                ],
-                "value": [e_y0, e_y1, ate, att, atc, naive],
-            }
-        )
+        # This contrast is generally biased for the ATE in observational data.
+        naive = data.loc[treated, "Y"].mean() - data.loc[controls, "Y"].mean()
+
+        rows = [
+            (r"$E[Y^0]$", e_y0),
+            (r"$E[Y^1]$", e_y1),
+            (r"ATE $=E[Y^1-Y^0]$", ate),
+            (r"ATT $=E[Y^1-Y^0\mid A=1]$", att),
+            (r"ATC $=E[Y^1-Y^0\mid A=0]$", atc),
+            (r"Observed contrast $E[Y\mid A=1]-E[Y\mid A=0]$", naive),
+        ]
+
+        return pd.DataFrame(rows, columns=["estimand or contrast", "value"])
 
 
     def continuous_cate_bins(data, n_bins=20):
+        """Estimate CATE(X) by averaging tau inside quantile bins of X."""
+
         x = data["X"].to_numpy()
         tau = data["tau"].to_numpy()
-        edges = np.quantile(x, np.linspace(0, 1, n_bins + 1))
-        edges[0] = edges[0] - 1e-8
-        edges[-1] = edges[-1] + 1e-8
-        bin_id = np.digitize(x, edges) - 1
+
+        # Quantile bins keep roughly the same number of observations per bin.
+        bin_edges = np.quantile(x, np.linspace(0, 1, n_bins + 1))
+        bin_edges[0] = bin_edges[0] - 1e-8
+        bin_edges[-1] = bin_edges[-1] + 1e-8
+        bin_id = np.digitize(x, bin_edges) - 1
+
         rows = []
-        for j in range(n_bins):
-            idx = bin_id == j
-            if idx.sum() > 0:
-                rows.append(
-                    {
-                        "x_mean": x[idx].mean(),
-                        "cate": tau[idx].mean(),
-                        "n": idx.sum(),
-                    }
-                )
+        for this_bin in range(n_bins):
+            in_bin = bin_id == this_bin
+
+            if in_bin.sum() == 0:
+                continue
+
+            rows.append(
+                {
+                    "x_mean": x[in_bin].mean(),
+                    "cate": tau[in_bin].mean(),
+                    "n": in_bin.sum(),
+                }
+            )
+
         return pd.DataFrame(rows)
 
 
@@ -237,66 +297,120 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
+    # Each slider controls one part of the data-generating process.
     controls = mo.ui.dictionary(
         {
-            "n": mo.ui.slider(start=2_000, stop=80_000, step=2_000, value=30_000, label="sample size"),
-            "confounding": mo.ui.slider(start=0.0, stop=3.0, step=0.05, value=1.25, label="confounding strength"),
-            "baseline_x": mo.ui.slider(start=0.0, stop=2.0, step=0.05, value=1.0, label="effect of X on baseline outcome"),
-            "tau_x": mo.ui.slider(start=-1.0, stop=1.0, step=0.05, value=0.40, label="heterogeneity: tau_X"),
-            "tau_g": mo.ui.slider(start=-1.0, stop=1.5, step=0.05, value=0.60, label="heterogeneity: tau_G"),
-            "tau0": mo.ui.slider(start=-1.0, stop=3.0, step=0.05, value=1.00, label="baseline treatment effect tau_0"),
-            "treatment_intercept": mo.ui.slider(start=-2.0, stop=2.0, step=0.05, value=-0.15, label="treatment intercept"),
-            "noise_sd": mo.ui.slider(start=0.25, stop=3.0, step=0.05, value=1.0, label="outcome noise SD"),
-            "seed": mo.ui.number(start=1, stop=999_999, value=2026, label="seed"),
+            "n": mo.ui.slider(
+                start=2_000,
+                stop=80_000,
+                step=2_000,
+                value=30_000,
+                label="sample size",
+            ),
+            "confounding": mo.ui.slider(
+                start=0.0,
+                stop=3.0,
+                step=0.05,
+                value=1.25,
+                label="confounding strength",
+            ),
+            "baseline_x": mo.ui.slider(
+                start=0.0,
+                stop=2.0,
+                step=0.05,
+                value=1.0,
+                label="effect of X on baseline outcome",
+            ),
+            "tau_x": mo.ui.slider(
+                start=-1.0,
+                stop=1.0,
+                step=0.05,
+                value=0.40,
+                label="heterogeneity: tau_X",
+            ),
+            "tau_g": mo.ui.slider(
+                start=-1.0,
+                stop=1.5,
+                step=0.05,
+                value=0.60,
+                label="heterogeneity: tau_G",
+            ),
+            "tau0": mo.ui.slider(
+                start=-1.0,
+                stop=3.0,
+                step=0.05,
+                value=1.00,
+                label="baseline treatment effect tau_0",
+            ),
+            "treatment_intercept": mo.ui.slider(
+                start=-2.0,
+                stop=2.0,
+                step=0.05,
+                value=-0.15,
+                label="treatment intercept",
+            ),
+            "noise_sd": mo.ui.slider(
+                start=0.25,
+                stop=3.0,
+                step=0.05,
+                value=1.0,
+                label="outcome noise SD",
+            ),
+            "seed": mo.ui.number(
+                start=1,
+                stop=999_999,
+                value=2026,
+                label="seed",
+            ),
         },
         label="DGP controls",
     )
+
+    # Show the controls vertically in the app.
     controls.vstack()
     return (controls,)
 
 
 @app.cell(hide_code=True)
 def _(controls, generate_population):
+    # Read the current slider values.
     values = controls.value
+
+    # Generate a new data set every time one of the controls changes.
     data = generate_population(
-        n=int(values["n"]),
-        seed=int(values["seed"]),
-        confounding_strength=float(values["confounding"]),
-        baseline_x_strength=float(values["baseline_x"]),
-        tau_x=float(values["tau_x"]),
-        tau_g=float(values["tau_g"]),
-        tau0=float(values["tau0"]),
-        treatment_intercept=float(values["treatment_intercept"]),
-        noise_sd=float(values["noise_sd"]),
+        n=values["n"],
+        seed=values["seed"],
+        confounding_strength=values["confounding"],
+        baseline_x_strength=values["baseline_x"],
+        tau_x=values["tau_x"],
+        tau_g=values["tau_g"],
+        tau0=values["tau0"],
+        treatment_intercept=values["treatment_intercept"],
+        noise_sd=values["noise_sd"],
     )
+
+    # Display the first rows so students can see the simulated variables.
     data.head()
     return data, values
 
 
 @app.cell(hide_code=True)
 def _(data, pd):
-    treatment_summary = pd.DataFrame(
-        {
-            "quantity": [
-                "Pr(A=1)",
-                "mean X",
-                "mean X among treated",
-                "mean X among controls",
-                "Pr(G=1)",
-                "Pr(G=1 among treated)",
-                "Pr(G=1 among controls)",
-            ],
-            "value": [
-                data["A"].mean(),
-                data["X"].mean(),
-                data.loc[data["A"] == 1, "X"].mean(),
-                data.loc[data["A"] == 0, "X"].mean(),
-                data["G"].mean(),
-                data.loc[data["A"] == 1, "G"].mean(),
-                data.loc[data["A"] == 0, "G"].mean(),
-            ],
-        }
-    )
+    # Masks make the summaries below easier to read.
+    treated = data["A"] == 1
+    controls = data["A"] == 0
+
+    rows = [
+        ("Pr(A=1)", data["A"].mean()),
+        ("mean X", data["X"].mean()),
+        ("mean X among treated", data.loc[treated, "X"].mean()),
+        ("mean X among controls", data.loc[controls, "X"].mean()),
+        ("Pr(G=1)", data["G"].mean()),
+        ("Pr(G=1 among treated)", data.loc[treated, "G"].mean()),
+        ("Pr(G=1 among controls)", data.loc[controls, "G"].mean()),
+    ]
+
+    treatment_summary = pd.DataFrame(rows, columns=["quantity", "value"])
     treatment_summary.round(3)
     return (treatment_summary,)
 
@@ -317,16 +431,29 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(data, np, plt):
-    x_grid_assign = np.linspace(data["X"].quantile(0.01), data["X"].quantile(0.99), 80)
     fig_assign, ax_assign = plt.subplots(figsize=(8, 4.6))
+
     for g_value in [0, 1]:
-        tmp = data[data["G"] == g_value].copy()
-        bins = np.quantile(tmp["X"], np.linspace(0, 1, 16))
-        bins[0] -= 1e-8
-        bins[-1] += 1e-8
-        tmp["x_bin"] = np.digitize(tmp["X"], bins) - 1
-        grouped = tmp.groupby("x_bin", observed=True).agg(x_mean=("X", "mean"), a_mean=("A", "mean"))
-        ax_assign.plot(grouped["x_mean"], grouped["a_mean"], marker="o", label=f"G={g_value}")
+        # Look only at one level of the discrete covariate G.
+        group_data = data[data["G"] == g_value].copy()
+
+        # Divide X into quantile bins, then estimate Pr(A=1) in each bin.
+        bin_edges = np.quantile(group_data["X"], np.linspace(0, 1, 16))
+        bin_edges[0] = bin_edges[0] - 1e-8
+        bin_edges[-1] = bin_edges[-1] + 1e-8
+        group_data["x_bin"] = np.digitize(group_data["X"], bin_edges) - 1
+
+        binned = group_data.groupby("x_bin", observed=True).agg(
+            x_mean=("X", "mean"),
+            a_mean=("A", "mean"),
+        )
+
+        ax_assign.plot(
+            binned["x_mean"],
+            binned["a_mean"],
+            marker="o",
+            label=f"G={g_value}",
+        )
 
     ax_assign.set_ylim(-0.02, 1.02)
     ax_assign.set_xlabel("continuous pre-treatment covariate X")
@@ -336,7 +463,7 @@ def _(data, np, plt):
     fig_assign.tight_layout()
     fig_assign
 
-    return ax_assign, bins, fig_assign, g_value, grouped, tmp, x_grid_assign
+    return ax_assign, fig_assign
 
 
 @app.cell(hide_code=True)
@@ -355,14 +482,21 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(data, np, plt, smooth_density):
-    y_pool = data["Y"].to_numpy()
-    y_left, y_right = np.quantile(y_pool, [0.005, 0.995])
+    # Use the central 99% of observed outcomes as the plotting range.
+    y_left, y_right = np.quantile(data["Y"], [0.005, 0.995])
     y_grid = np.linspace(y_left, y_right, 360)
 
+    treated = data["A"] == 1
+    controls = data["A"] == 0
+
+    density_y = smooth_density(data["Y"], y_grid)
+    density_y_a0 = smooth_density(data.loc[controls, "Y"], y_grid)
+    density_y_a1 = smooth_density(data.loc[treated, "Y"], y_grid)
+
     fig_obs, ax_obs = plt.subplots(figsize=(8, 4.8))
-    ax_obs.plot(y_grid, smooth_density(data["Y"], y_grid), linewidth=2.4, label="marginal P(Y)")
-    ax_obs.plot(y_grid, smooth_density(data.loc[data["A"] == 0, "Y"], y_grid), label="conditional P(Y | A=0)")
-    ax_obs.plot(y_grid, smooth_density(data.loc[data["A"] == 1, "Y"], y_grid), label="conditional P(Y | A=1)")
+    ax_obs.plot(y_grid, density_y, linewidth=2.4, label="marginal P(Y)")
+    ax_obs.plot(y_grid, density_y_a0, label="conditional P(Y | A=0)")
+    ax_obs.plot(y_grid, density_y_a1, label="conditional P(Y | A=1)")
     ax_obs.set_xlabel("outcome value y")
     ax_obs.set_ylabel("density")
     ax_obs.set_title("Observed distributions: marginal vs conditional")
@@ -370,7 +504,7 @@ def _(data, np, plt, smooth_density):
     fig_obs.tight_layout()
     fig_obs
 
-    return ax_obs, fig_obs, y_grid, y_left, y_pool, y_right
+    return ax_obs, fig_obs, y_grid
 
 
 @app.cell(hide_code=True)
@@ -398,21 +532,50 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(data, np, plt, smooth_density):
-    pooled = np.concatenate(
+    # To compare all curves on the same x-axis, build the grid from Y, Y0, and Y1.
+    all_outcomes = np.concatenate(
         [
             data["Y"].to_numpy(),
             data["Y0"].to_numpy(),
             data["Y1"].to_numpy(),
         ]
     )
-    left, right = np.quantile(pooled, [0.005, 0.995])
+    left, right = np.quantile(all_outcomes, [0.005, 0.995])
     grid = np.linspace(left, right, 380)
 
+    treated = data["A"] == 1
+    controls = data["A"] == 0
+
+    density_y0 = smooth_density(data["Y0"], grid)
+    density_y1 = smooth_density(data["Y1"], grid)
+    density_y_a0 = smooth_density(data.loc[controls, "Y"], grid)
+    density_y_a1 = smooth_density(data.loc[treated, "Y"], grid)
+
     fig_do, ax_do = plt.subplots(figsize=(8.5, 5.0))
-    ax_do.plot(grid, smooth_density(data["Y0"], grid), linewidth=2.4, label="interventional P(Y^0) = P(Y | do(A=0))")
-    ax_do.plot(grid, smooth_density(data["Y1"], grid), linewidth=2.4, label="interventional P(Y^1) = P(Y | do(A=1))")
-    ax_do.plot(grid, smooth_density(data.loc[data["A"] == 0, "Y"], grid), linestyle="--", label="observed P(Y | A=0)")
-    ax_do.plot(grid, smooth_density(data.loc[data["A"] == 1, "Y"], grid), linestyle="--", label="observed P(Y | A=1)")
+    ax_do.plot(
+        grid,
+        density_y0,
+        linewidth=2.4,
+        label="interventional P(Y^0) = P(Y | do(A=0))",
+    )
+    ax_do.plot(
+        grid,
+        density_y1,
+        linewidth=2.4,
+        label="interventional P(Y^1) = P(Y | do(A=1))",
+    )
+    ax_do.plot(
+        grid,
+        density_y_a0,
+        linestyle="--",
+        label="observed P(Y | A=0)",
+    )
+    ax_do.plot(
+        grid,
+        density_y_a1,
+        linestyle="--",
+        label="observed P(Y | A=1)",
+    )
     ax_do.set_xlabel("outcome value y")
     ax_do.set_ylabel("density")
     ax_do.set_title("Observed conditional curves vs post-intervention curves")
@@ -420,7 +583,7 @@ def _(data, np, plt, smooth_density):
     fig_do.tight_layout()
     fig_do
 
-    return ax_do, fig_do, grid, left, pooled, right
+    return ax_do, fig_do, grid
 
 
 @app.cell(hide_code=True)
@@ -455,8 +618,10 @@ def _(data, estimand_summary):
 
 @app.cell(hide_code=True)
 def _(estimands, plt):
+    # Rows 2--5 contain ATE, ATT, ATC, and the observed contrast.
     contrast_rows = estimands.iloc[[2, 3, 4, 5]].copy()
     labels = ["ATE", "ATT", "ATC", "observed\ncontrast"]
+
     fig_estimands, ax_estimands = plt.subplots(figsize=(8, 4.8))
     ax_estimands.axhline(0.0, linewidth=1)
     ax_estimands.bar(labels, contrast_rows["value"])
@@ -489,10 +654,14 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(continuous_cate_bins, data, np, plt, values):
+    # Binned points: empirical averages of the individual treatment effect tau.
     cate_bins = continuous_cate_bins(data, n_bins=22)
+
+    # Smooth line: the theoretical CATE curve implied by the DGP.
+    # Because G is independent of X here, E[G | X=x] is approximately E[G].
     x_grid = np.linspace(data["X"].quantile(0.01), data["X"].quantile(0.99), 200)
-    # Because G is independent of X in this DGP, E[G | X=x] is approximately E[G].
-    cate_curve = float(values["tau0"]) + float(values["tau_x"]) * x_grid + float(values["tau_g"]) * data["G"].mean()
+    mean_g = data["G"].mean()
+    cate_curve = values["tau0"] + values["tau_x"] * x_grid + values["tau_g"] * mean_g
 
     fig_cate_x, ax_cate_x = plt.subplots(figsize=(8, 4.8))
     ax_cate_x.plot(x_grid, cate_curve, linewidth=2.3, label="population CATE(x) curve")
@@ -528,14 +697,21 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(data, plt):
+    # Average the individual treatment effect separately for G=0 and G=1.
     cate_g = (
         data.groupby("G", observed=True)
-        .agg(cate=("tau", "mean"), n=("tau", "size"), mean_x=("X", "mean"))
+        .agg(
+            cate=("tau", "mean"),
+            n=("tau", "size"),
+            mean_x=("X", "mean"),
+        )
         .reset_index()
     )
 
+    bar_labels = [f"G={int(g)}" for g in cate_g["G"]]
+
     fig_cate_g, ax_cate_g = plt.subplots(figsize=(7, 4.6))
-    ax_cate_g.bar([f"G={int(g)}" for g in cate_g["G"]], cate_g["cate"])
+    ax_cate_g.bar(bar_labels, cate_g["cate"])
     ax_cate_g.axhline(data["tau"].mean(), linewidth=1, linestyle="--", label="ATE")
     ax_cate_g.set_ylabel("E[Y^1 - Y^0 | G=g]")
     ax_cate_g.set_title("CATE as a function of a discrete variable")

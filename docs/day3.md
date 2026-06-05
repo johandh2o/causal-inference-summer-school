@@ -28,7 +28,9 @@ By the end of this session, students should be able to:
 | 10:05--10:40 | Introduction, formalisms and causal effects | Lecture |
 | 10:40--11:00 | Common causal estimands | Simulation lab |
 | 11:00--11:10 | 10 minute break | |
-| 11:10--11:50 | The causal workflow, identification | Lecture  |
+| 11:10--11:25 | The causal workflow, identification | Lecture  |
+| 11:25--12:00 | Parametric and plug-in estimation | Lecture + Simulation lab |
+| 12:00--13:00 | Lunch | |
 
 
 ## Advanced readings
