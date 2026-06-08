@@ -25,13 +25,19 @@ By the end of this session, students should be able to:
 
 | Time | Topic | Format |
 |---:|---|---|
-| 10:05--10:40 | Introduction, formalisms and causal effects | Lecture |
-| 10:40--11:00 | Common causal estimands | Simulation lab |
-| 11:00--11:10 | 10 minute break | |
-| 11:10--11:25 | The causal workflow, identification | Lecture  |
-| 11:25--12:00 | Parametric and plug-in estimation | Lecture + Simulation lab |
+| 10:05--10:45 | Introduction, formalisms and causal effects | Lecture |
+| 10:45--11:00 | Common causal estimands | Marimo lab |
+| 11:00--11:15 | The causal workflow, identification | Lecture  |
+| 11:15--11:45 | Estimation: parametric and ML plug-in | Lecture |
+| 11:45--12:00 | Estimation: parametric and ML plug-in | Marimo lab |
 | 12:00--13:00 | Lunch | |
-
+| 13:05--13:30 | AIPW and double robustness | Lecture  |
+| 13:30--14:00 | State-of-the-art and orthogonal estimation  | Lecture  |
+| 14:00--14:30 | DML and TMLE  | Lecture |
+| 14:30--15:00 | AIPW, DML and TMLE | Collab lab  |
+| 15:00--15:15 | Break |   |
+| 15:15--15:45 | CATE meta-learners  |   |
+| 15:45--16:15 | CATE meta-learners  | Collab lab  |
 
 ## Advanced readings
 

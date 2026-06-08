@@ -62,6 +62,12 @@ By the end of the course, students should be able to:
 | 4 | Score-based structure learning | Prof. Pekka Parviainen |
 | 4 | Learning beyond equivalence classes | Prof. Pekka Parviainen |
 
+## Slides
+- [Day 1](https://www.mn.uio.no/math/english/people/aca/johanpen/nora-2025-day1.pdf)
+- Day 2
+- Day 3
+- Day 4
+
 ## Recommended readings
 
 Here is a list of references, including papers and textbooks, covering the topics presented at the summer school. You are invited to have a look at these sources to get a foundation of the ideas we will work on during the week.
