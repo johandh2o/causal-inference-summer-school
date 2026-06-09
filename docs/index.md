@@ -64,7 +64,9 @@ By the end of the course, students should be able to:
 
 ## Slides and notebooks
 - [Day 1 slides](https://www.mn.uio.no/math/english/people/aca/johanpen/nora-2025-day1.pdf)
-- [Day 2 slides](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/slides/day2.pdf)
+- [Day 2 slides](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/slides/day2.pdf) 
+- [Day 2 notebook (to download from Github)](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/notebooks/day2.ipynb)
+- [Day 2 notebook (to use Colab save it in your Google Drive)](https://colab.research.google.com/drive/1ekSuRUQBlU4BbkRslk16m61OhkvQyPVS?usp=sharing)
 - [Day 3 slides](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/slides/day3.pdf)
 - Day 4
 
