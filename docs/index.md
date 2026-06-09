@@ -62,10 +62,10 @@ By the end of the course, students should be able to:
 | 4 | Score-based structure learning | Prof. Pekka Parviainen |
 | 4 | Learning beyond equivalence classes | Prof. Pekka Parviainen |
 
-## Slides
-- [Day 1](https://www.mn.uio.no/math/english/people/aca/johanpen/nora-2025-day1.pdf)
-- Day 2
-- Day 3
+## Slides and notebooks
+- [Day 1 slides](https://www.mn.uio.no/math/english/people/aca/johanpen/nora-2025-day1.pdf)
+- [Day 2 slides](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/slides/day2.pdf)
+- [Day 3 slides](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/slides/day3.pdf)
 - Day 4
 
 ## Recommended readings
