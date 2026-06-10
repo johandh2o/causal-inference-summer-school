@@ -15,10 +15,9 @@ This session is given by [Johan de Aguas](https://johandh2o.github.io).
 By the end of this session, students should be able to:
 
 - Define the average treatment effect under standard causal assumptions.
-- Implement the g-computation estimator.
-- Implement inverse probability weighting.
-- Explain why doubly robust estimators combine outcome and treatment models.
-- Diagnose practical problems such as positivity violations, misspecification, and unstable weights.
+- Implement plug-in estimators.
+- Implement AIPW estimators.
+- Explain how doubly robust estimators combine outcome and treatment models.
 - Use cross-fitting to reduce overfitting bias when nuisance functions are estimated flexibly.
 
 ## Schedule
@@ -39,19 +38,19 @@ By the end of this session, students should be able to:
 | 15:30--16:00 | Heterogeneous treatment effect  |   |
 | 16:00--16:30 | Heterogeneous treatment effect  | Collab lab  |
 
+## Notebooks
+
+The interactive and coding labs are available here:
+
+- Marimo lab 1: [Common causal estimands](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/1_causal_estimands_visual_simulation_marimo.py/wasm)
+- Marimo lab 2: [Plug-in estimators](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/2_estimation_s_t_parametric_marimo.py/wasm)
+
+
 ## Advanced readings
 
 - Robins, J. M., Rotnitzky, A., & Zhao, L. P. (1994). [Estimation of regression coefficients when some regressors are not always observed](https://www.jstor.org/stable/2290910). *Journal of the American Statistical Association*, 89(427), 846--866. doi:10.1080/01621459.1994.10476818
 - van der Laan, M. J., & Rubin, D. (2006). [Targeted maximum likelihood learning](https://biostats.bepress.com/cgi/viewcontent.cgi?article=1214&context=ucbbiostat). *The International Journal of Biostatistics*, 2(1), Article 11. doi:10.2202/1557-4679.1043
 - Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018). [Double/debiased machine learning for treatment and structural parameters](https://academic.oup.com/ectj/article/21/1/C1/5056401). *The Econometrics Journal*, 21(1), C1--C68. doi:10.1111/ectj.12097
-
-## Notebooks
-
-The coding labs are available here:
-
-- Simulation lab 1: [Common causal estimands](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/1_causal_estimands_visual_simulatio_marimo.py/wasm)
-- [Plug-in bias](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/ate_plugin_first_order_bias_marimo.py/wasm)
-
 
 ## Tutorials, online books and resources
 
