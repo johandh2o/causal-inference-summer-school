@@ -36,7 +36,7 @@ By the end of this session, students should be able to:
 | 14:30--15:00 | Influence function, DML (and TMLE*)  | Lecture |
 | 15:00--15:30 | AIPW, DML (and TMLE*) | [Marimo lab](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/4_dml_tmle_marimo.py/wasm)  | 
 | 15:30--16:00 | Heterogeneous treatment effect  |   |
-| 16:00--16:30 | Heterogeneous treatment effect  | Marimo lab  |
+| 16:00--16:30 | Heterogeneous treatment effect  | [Marimo lab](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/5_hte_r_dr_marimo.py/wasm)  |
 
 ## Advanced readings
 
