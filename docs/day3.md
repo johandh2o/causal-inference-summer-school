@@ -20,31 +20,23 @@ By the end of this session, students should be able to:
 - Explain how doubly robust estimators combine outcome and treatment models.
 - Use cross-fitting to reduce overfitting bias when nuisance functions are estimated flexibly.
 
-## Schedule
+## Schedule and notebooks
 
 | Time | Topic | Format |
 |---:|---|---|
 | 10:05--10:45 | Introduction, formalisms and causal effects | Lecture |
-| 10:45--11:00 | Common causal estimands | Marimo lab |
+| 10:45--11:00 | Common causal estimands | [Marimo lab](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/1_causal_estimands_visual_simulation_marimo.py/wasm) |
 | 11:00--11:15 | The causal roadmap, identification | Lecture  |
 | 11:15--11:45 | Estimation: parametric and ML plug-in | Lecture |
-| 11:45--12:00 | Estimation: parametric and ML plug-in | Marimo lab |
+| 11:45--12:00 | Estimation: parametric and ML plug-in | [Marimo lab](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/2_estimation_s_t_parametric_marimo.py/wasm) |
 | 12:00--13:00 | Lunch | |
 | 13:05--13:45 | AIPW and double robustness | Lecture  |
 | 13:45--14:15 | State-of-the-art and NN architectures  | Lecture  |
-| 14:15--14:45 | AIPW | Collab lab  |
+| 14:15--14:45 | AIPW | Colab lab  |
 | 14:45--15:15 | Influence function, DML (and TMLE*)  | Lecture |
-| 15:15--15:30 | AIPW, DML (and TMLE*) | Collab lab  | |
+| 15:15--15:30 | AIPW, DML (and TMLE*) | Colab lab  | 
 | 15:30--16:00 | Heterogeneous treatment effect  |   |
-| 16:00--16:30 | Heterogeneous treatment effect  | Collab lab  |
-
-## Notebooks
-
-The interactive and coding labs are available here:
-
-- Marimo lab 1: [Common causal estimands](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/1_causal_estimands_visual_simulation_marimo.py/wasm)
-- Marimo lab 2: [Plug-in estimators](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/2_estimation_s_t_parametric_marimo.py/wasm)
-
+| 16:00--16:30 | Heterogeneous treatment effect  | Colab lab  |
 
 ## Advanced readings
 
