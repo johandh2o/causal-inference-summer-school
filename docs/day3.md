@@ -24,7 +24,7 @@ By the end of this session, students should be able to:
 
 | Time | Topic | Format |
 |---:|---|---|
-| 10:05--10:45 | Introduction, formalisms and causal effects | Lecture |
+| 10:05--10:45 | Introduction, formalisms and causal effects | [Lecture](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/slides/day3.pdf) |
 | 10:45--11:00 | Common causal estimands | [Marimo lab](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/1_causal_estimands_visual_simulation_marimo.py/wasm) |
 | 11:00--11:15 | The causal roadmap, identification | Lecture  |
 | 11:15--11:45 | Estimation: parametric and ML plug-in | Lecture |
