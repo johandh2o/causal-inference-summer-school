@@ -141,7 +141,7 @@ def _(mo):
     \widehat\psi_{\text{AIPW},2}.
     \]
 
-    For both AIPW estimators, \(\widehat\varpi(W)\) is set to the **correct propensity score from the simulator**, with a mild numerical truncation at 0.02 and 0.98. This isolates the double-robustness idea: even if \(Q\) is badly wrong, AIPW can still recover \(\psi\) when \(\varpi\) is correct and overlap is not too weak.
+    For both AIPW estimators, \(\widehat\varpi(W)\) is set to the **correct propensity score from the simulator**, with a mild numerical truncation at 0.005 and 0.995. This isolates the double-robustness idea: even if \(Q\) is badly wrong, AIPW can still recover \(\psi\) when \(\varpi\) is correct and overlap is not too weak.
     """)
     return
 
@@ -474,8 +474,8 @@ def _(mo):
     2. Increase \(\lambda\) to **add more overlap problems**. What happens to the confidence intervals of the AIPW estimators? Relate this to the terms
        \(A/\widehat\pi(1\mid W)\) and \((1-A)/(1-\widehat\pi(0\mid W))\) in the one-step correction.
     3. Compare \(Q_1^{\mathrm{mis}}\) and \(Q_2^{\mathrm{mis}}\). In which way these models are misspecified? Does adding some interactions necessarily solve confounding bias? How would you specify a new outcome model so it does not suffer from the same issues?
-    5. Explain why AIPW is not magic: what would happen if \(\widehat\pi\) is also misspecified or there are overlap issues? What diagnostic analysis and plots would make you choose between a plug-in or an AIPW? Remember that in real-world settings we **never observe the oracle** (broken line in plots above).
-    6. Feel free to try new configurations and to check the code and formulate questions.
+    4. Explain why AIPW is not magic: what would happen if \(\widehat\pi\) is also misspecified or there are overlap issues? What diagnostic analysis and plots would make you choose between a plug-in or an AIPW? Remember that in real-world settings we **never observe the oracle** (broken line in plots above).
+    5. Feel free to try new configurations and to check the code and formulate questions.
     """)
     return
 

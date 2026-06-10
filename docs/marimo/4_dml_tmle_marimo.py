@@ -164,8 +164,8 @@ def _(mo):
 
     \[
     \widehat\epsilon
-    =\frac{n^{-1}\sum_{i=1}^n\left[H(W_i,A_i)\{Y_i-\widehat Q(W_i,A_i)\}\right]}
-    {n^{-1}\sum_{i=1}^n\{H(W_i,A_i)^2\}}.
+    =\frac{\sum_{i=1}^n\left[H(W_i,A_i)\{Y_i-\widehat Q(W_i,A_i)\}\right]}
+    {\sum_{i=1}^n\{H(W_i,A_i)^2\}}.
     \]
 
     The propensity-score lever lets you compare two options. The first option uses the true \(\varpi(W)\) from the simulator, which isolates the effect of overfitting in \(Q\). The second option estimates a deliberately misspecified propensity score by fitting the logistic model
