@@ -1,10 +1,10 @@
 import marimo
 
-__generated_with = "0.12.9"
+__generated_with = "0.23.8"
 app = marimo.App(width="full")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     # These are the only packages used in the notebook.
     # marimo builds the app, numpy simulates arrays, pandas stores tables,
@@ -13,73 +13,70 @@ def _():
     import numpy as np
     import pandas as pd
     import matplotlib.pyplot as plt
+
     return mo, np, pd, plt
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        # Causal effects, queries, and estimands: a visual simulation
+    mo.md(r"""
+    # Causal effects, queries, and estimands: a visual simulation
 
-        This notebook uses a small structural simulation to make the standard causal estimands visible.
-        We generate a binary treatment $A$, a continuous pre-treatment covariate $X$, a discrete
-        pre-treatment covariate $G$, and two potential outcomes $Y^0,Y^1$.
+    This notebook uses a small structural simulation to make the standard causal estimands visible.
+    We generate a binary treatment $A$, a continuous pre-treatment covariate $X$, a discrete
+    pre-treatment covariate $G$, and two potential outcomes $Y^0,Y^1$.
 
-        The notebook visualizes:
+    The notebook visualizes:
 
-        - the marginal observed distribution $P(Y)$,
-        - conditional observed distributions such as $P(Y\mid A=1)$ and $P(Y\mid A=0)$,
-        - post-intervention distributions $P(Y\mid do(A=a)) \equiv P(Y^a)$,
-        - expected potential outcomes $E[Y^a]$,
-        - the ATE, CATE, and ATT.
+    - the marginal observed distribution $P(Y)$,
+    - conditional observed distributions such as $P(Y\mid A=1)$ and $P(Y\mid A=0)$,
+    - post-intervention distributions $P(Y\mid do(A=a)) \equiv P(Y^a)$,
+    - expected potential outcomes $E[Y^a]$,
+    - the ATE, CATE, and ATT.
 
-        The key teaching contrast is:
+    The key teaching contrast is:
 
-        $$
-        P(Y\mid A=a) \neq P(Y\mid do(A=a))
-        $$
+    $$
+    P(Y\mid A=a) \neq P(Y\mid do(A=a))
+    $$
 
-        in observational data with confounding. Use the **confounding strength** slider to see how the
-        conditional observed bell curves separate from the post-intervention bell curves.
-        """
-    )
+    in observational data with confounding. Use the **confounding strength** slider to see how the
+    conditional observed bell curves separate from the post-intervention bell curves.
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Data-generating process
+    mo.md(r"""
+    ## Data-generating process
 
-        The simulation follows the simple SCM
+    The simulation follows the simple SCM
 
-        $$
-        X \leftarrow U_X,\qquad
-        G \leftarrow U_G,\qquad
-        A \leftarrow \mathrm{Bernoulli}\{\pi(X,G)\},\qquad
-        Y \leftarrow Y^A.
-        $$
+    $$
+    X \leftarrow U_X,\qquad
+    G \leftarrow U_G,\qquad
+    A \leftarrow \mathrm{Bernoulli}\{\pi(X,G)\},\qquad
+    Y \leftarrow Y^A.
+    $$
 
-        The potential outcomes are
+    The potential outcomes are
 
-        $$
-        Y^0 = \mu_0(X,G) + \varepsilon,
-        \qquad
-        Y^1 = Y^0 + \tau(X,G),
-        $$
+    $$
+    Y^0 = \mu_0(X,G) + \varepsilon,
+    \qquad
+    Y^1 = Y^0 + \tau(X,G),
+    $$
 
-        with heterogeneous treatment effect
+    with heterogeneous treatment effect
 
-        $$
-        \tau(X,G)=\tau_0 + \tau_X X + \tau_G G.
-        $$
+    $$
+    \tau(X,G)=\tau_0 + \tau_X X + \tau_G G.
+    $$
 
-        Here $X$ and $G$ are pre-treatment variables, so quantities such as
-        $E[Y^1-Y^0\mid X=x]$ and $E[Y^1-Y^0\mid G=g]$ are well-defined CATEs.
-        """
-    )
+    Here $X$ and $G$ are pre-treatment variables, so quantities such as
+    $E[Y^1-Y^0\mid X=x]$ and $E[Y^1-Y^0\mid G=g]$ are well-defined CATEs.
+    """)
     return
 
 
@@ -273,7 +270,6 @@ def _(np, pd):
     return (
         continuous_cate_bins,
         estimand_summary,
-        expit,
         generate_population,
         smooth_density,
     )
@@ -281,17 +277,15 @@ def _(np, pd):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Interactive parameters
+    mo.md(r"""
+    ## Interactive parameters
 
-        A useful classroom sequence is:
+    A useful classroom sequence is:
 
-        1. set confounding strength to zero and compare $P(Y\mid A=a)$ with $P(Y^a)$;
-        2. increase confounding strength and watch the observed conditional curves move away from the causal curves;
-        3. increase treatment-effect heterogeneity in $X$ or $G$ and watch ATE and ATT separate.
-        """
-    )
+    1. set confounding strength to zero and compare $P(Y\mid A=a)$ with $P(Y^a)$;
+    2. increase confounding strength and watch the observed conditional curves move away from the causal curves;
+    3. increase treatment-effect heterogeneity in $X$ or $G$ and watch ATE and ATT separate.
+    """)
     return
 
 
@@ -372,7 +366,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(controls, generate_population):
+def _(controls, generate_population, mo):
     # Read the current slider values.
     values = controls.value
 
@@ -389,13 +383,18 @@ def _(controls, generate_population):
         noise_sd=values["noise_sd"],
     )
 
-    # Display the first rows so students can see the simulated variables.
-    data.head()
+    # Keep the raw simulated data available, but hidden by default.
+    mo.md(
+        "<details>"
+        "<summary>Optional: show the first rows of the simulated data</summary>"
+        + data.head().round(3).to_html(index=False)
+        + "</details>"
+    )
     return data, values
 
 
 @app.cell(hide_code=True)
-def _(data, pd):
+def _(data, mo, pd):
     # Masks make the summaries below easier to read.
     _treated_mask = data["A"] == 1
     _control_mask = data["A"] == 0
@@ -411,128 +410,47 @@ def _(data, pd):
     ]
 
     treatment_summary = pd.DataFrame(rows, columns=["quantity", "value"])
-    treatment_summary.round(3)
-    return (treatment_summary,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
     mo.md(
-        r"""
-        ## 1. Treatment assignment and confounding
-
-        When confounding strength is positive, the treated and untreated groups have different distributions of
-        the pre-treatment causes $X$ and $G$. This is why the passive comparison $P(Y\mid A=1)$ vs.
-        $P(Y\mid A=0)$ need not equal the causal comparison $P(Y^1)$ vs. $P(Y^0)$.
-        """
+        "<details>"
+        "<summary>Optional: show treatment-assignment and confounding summaries</summary>"
+        + treatment_summary.round(3).to_html(index=False)
+        + "</details>"
     )
     return
 
 
 @app.cell(hide_code=True)
-def _(data, np, plt):
-    fig_assign, ax_assign = plt.subplots(figsize=(8, 4.6))
-
-    for g_value in [0, 1]:
-        # Look only at one level of the discrete covariate G.
-        group_data = data[data["G"] == g_value].copy()
-
-        # Divide X into quantile bins, then estimate Pr(A=1) in each bin.
-        bin_edges = np.quantile(group_data["X"], np.linspace(0, 1, 16))
-        bin_edges[0] = bin_edges[0] - 1e-8
-        bin_edges[-1] = bin_edges[-1] + 1e-8
-        group_data["x_bin"] = np.digitize(group_data["X"], bin_edges) - 1
-
-        binned = group_data.groupby("x_bin", observed=True).agg(
-            x_mean=("X", "mean"),
-            a_mean=("A", "mean"),
-        )
-
-        ax_assign.plot(
-            binned["x_mean"],
-            binned["a_mean"],
-            marker="o",
-            label=f"G={g_value}",
-        )
-
-    ax_assign.set_ylim(-0.02, 1.02)
-    ax_assign.set_xlabel("continuous pre-treatment covariate X")
-    ax_assign.set_ylabel("empirical Pr(A=1 | X bin, G)")
-    ax_assign.set_title("Treatment selection as a function of pre-treatment variables")
-    ax_assign.legend(title="discrete group")
-    fig_assign.tight_layout()
-    fig_assign
-
-    return ax_assign, fig_assign
-
-
-@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## 2. Marginal and conditional observed distributions
+    mo.md(r"""
+    ## 1. Observed and post-intervention distributions
 
-        The marginal distribution $P(Y)$ mixes treated and untreated outcomes under the natural treatment mechanism.
-        The conditional distributions $P(Y\mid A=1)$ and $P(Y\mid A=0)$ are distributions in selected subpopulations,
-        not intervention distributions.
-        """
-    )
+    This plot compares five distributions. Three are observed under the natural treatment mechanism:
+
+    $$
+    P(Y),\qquad P(Y\mid A=0),\qquad P(Y\mid A=1).
+    $$
+
+    Two are causal post-intervention distributions:
+
+    $$
+    P(Y\mid do(A=0)) = P(Y^0),\qquad
+    P(Y\mid do(A=1)) = P(Y^1).
+    $$
+
+    The key contrast is that conditioning and intervening are different operations:
+
+    $$
+    P(Y\mid A=a) \neq P(Y\mid do(A=a))\quad\text{in general}.
+    $$
+
+    Increase the confounding-strength slider and watch the observed conditional curves move away from the causal post-intervention curves.
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(data, np, plt, smooth_density):
-    # Use the central 99% of observed outcomes as the plotting range.
-    y_left, y_right = np.quantile(data["Y"], [0.005, 0.995])
-    y_grid = np.linspace(y_left, y_right, 360)
-
-    _treated_mask = data["A"] == 1
-    _control_mask = data["A"] == 0
-
-    density_y = smooth_density(data["Y"], y_grid)
-    _density_y_a0_obs = smooth_density(data.loc[_control_mask, "Y"], y_grid)
-    _density_y_a1_obs = smooth_density(data.loc[_treated_mask, "Y"], y_grid)
-
-    fig_obs, ax_obs = plt.subplots(figsize=(8, 4.8))
-    ax_obs.plot(y_grid, density_y, linewidth=2.4, label="marginal P(Y)")
-    ax_obs.plot(y_grid, _density_y_a0_obs, label="conditional P(Y | A=0)")
-    ax_obs.plot(y_grid, _density_y_a1_obs, label="conditional P(Y | A=1)")
-    ax_obs.set_xlabel("outcome value y")
-    ax_obs.set_ylabel("density")
-    ax_obs.set_title("Observed distributions: marginal vs conditional")
-    ax_obs.legend()
-    fig_obs.tight_layout()
-    fig_obs
-
-    return ax_obs, fig_obs, y_grid
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-        ## 3. Post-intervention distributions
-
-        In this simulation the potential outcomes are known, so we can directly draw the post-intervention
-        distributions
-
-        $$
-        P(Y\mid do(A=0)) = P(Y^0),
-        \qquad
-        P(Y\mid do(A=1)) = P(Y^1).
-        $$
-
-        Compare these curves with the passive conditional curves $P(Y\mid A=0)$ and $P(Y\mid A=1)$.
-        With confounding, conditioning on $A=a$ selects a non-representative subpopulation; intervening with
-        $do(A=a)$ applies the treatment level to the whole population.
-        """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(data, np, plt, smooth_density):
-    # To compare all curves on the same x-axis, build the grid from Y, Y0, and Y1.
+    # To compare all five curves on the same x-axis, build the grid from Y, Y0, and Y1.
     all_outcomes = np.concatenate(
         [
             data["Y"].to_numpy(),
@@ -541,78 +459,62 @@ def _(data, np, plt, smooth_density):
         ]
     )
     left, right = np.quantile(all_outcomes, [0.005, 0.995])
-    grid = np.linspace(left, right, 380)
+    grid = np.linspace(left, right, 420)
 
     _treated_mask = data["A"] == 1
     _control_mask = data["A"] == 0
 
+    density_y = smooth_density(data["Y"], grid)
+    density_y_a0_obs = smooth_density(data.loc[_control_mask, "Y"], grid)
+    density_y_a1_obs = smooth_density(data.loc[_treated_mask, "Y"], grid)
     density_y0 = smooth_density(data["Y0"], grid)
     density_y1 = smooth_density(data["Y1"], grid)
-    _density_y_a0_do = smooth_density(data.loc[_control_mask, "Y"], grid)
-    _density_y_a1_do = smooth_density(data.loc[_treated_mask, "Y"], grid)
 
-    fig_do, ax_do = plt.subplots(figsize=(8.5, 5.0))
-    ax_do.plot(
-        grid,
-        density_y0,
-        linewidth=2.4,
-        label="interventional P(Y^0) = P(Y | do(A=0))",
-    )
-    ax_do.plot(
-        grid,
-        density_y1,
-        linewidth=2.4,
-        label="interventional P(Y^1) = P(Y | do(A=1))",
-    )
-    ax_do.plot(
-        grid,
-        _density_y_a0_do,
-        linestyle="--",
-        label="observed P(Y | A=0)",
-    )
-    ax_do.plot(
-        grid,
-        _density_y_a1_do,
-        linestyle="--",
-        label="observed P(Y | A=1)",
-    )
-    ax_do.set_xlabel("outcome value y")
-    ax_do.set_ylabel("density")
-    ax_do.set_title("Observed conditional curves vs post-intervention curves")
-    ax_do.legend(fontsize=9)
-    fig_do.tight_layout()
-    fig_do
-
-    return ax_do, fig_do, grid
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-        ## 4. Expected potential outcomes, ATE, ATT, and the naive observed contrast
-
-        The estimands are computed using the simulated potential outcomes:
-
-        $$
-        E[Y^a] = E[Y\mid do(A=a)],
-        \qquad
-        ATE = E[Y^1-Y^0],
-        \qquad
-        ATT = E[Y^1-Y^0\mid A=1].
-        $$
-
-        The last row below is not a causal estimand in general. It is the purely observational contrast
-        $E[Y\mid A=1]-E[Y\mid A=0]$.
-        """
-    )
+    fig_dist, ax_dist = plt.subplots(figsize=(9.2, 5.2))
+    ax_dist.plot(grid, density_y, linewidth=2.5, label=r"marginal $P(Y)$")
+    ax_dist.plot(grid, density_y_a0_obs, linestyle="--", label=r"observed $P(Y\mid A=0)$")
+    ax_dist.plot(grid, density_y_a1_obs, linestyle="--", label=r"observed $P(Y\mid A=1)$")
+    ax_dist.plot(grid, density_y0, linewidth=2.3, label=r"interventional $P(Y^0)$")
+    ax_dist.plot(grid, density_y1, linewidth=2.3, label=r"interventional $P(Y^1)$")
+    ax_dist.set_xlabel("outcome value y")
+    ax_dist.set_ylabel("density")
+    ax_dist.set_title("Observed conditional distributions vs post-intervention distributions")
+    ax_dist.legend(fontsize=9)
+    fig_dist.tight_layout()
+    fig_dist
     return
 
 
 @app.cell(hide_code=True)
-def _(data, estimand_summary):
+def _(mo):
+    mo.md(r"""
+    ## 2. Expected potential outcomes, ATE, ATT, and the naive observed contrast
+
+    The estimands are computed using the simulated potential outcomes:
+
+    $$
+    E[Y^a] = E[Y\mid do(A=a)],
+    \qquad
+    ATE = E[Y^1-Y^0],
+    \qquad
+    ATT = E[Y^1-Y^0\mid A=1].
+    $$
+
+    The last row below is not a causal estimand in general. It is the purely observational contrast
+    $E[Y\mid A=1]-E[Y\mid A=0]$.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(data, estimand_summary, mo):
     estimands = estimand_summary(data)
-    estimands.round(3)
+    mo.md(
+        "<details>"
+        "<summary>Optional: show estimand and contrast table</summary>"
+        + estimands.round(3).to_html(index=False)
+        + "</details>"
+    )
     return (estimands,)
 
 
@@ -629,26 +531,23 @@ def _(estimands, plt):
     ax_estimands.set_title("Causal effects vs the naive observed contrast")
     fig_estimands.tight_layout()
     fig_estimands
-
-    return ax_estimands, contrast_rows, fig_estimands, labels
+    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## 5. CATE as a function of a continuous pre-treatment variable
+    mo.md(r"""
+    ## 3. CATE as a function of a continuous pre-treatment variable
 
-        The continuous CATE shown here is
+    The continuous CATE shown here is
 
-        $$
-        CATE(x)=E[Y^1-Y^0\mid X=x].
-        $$
+    $$
+    CATE(x)=E[Y^1-Y^0\mid X=x].
+    $$
 
-        Since $X$ is pre-treatment, this is a causal subgroup estimand. In the simulation, the CATE changes
-        with $x$ when the slider $\tau_X$ is not zero.
-        """
-    )
+    Since $X$ is pre-treatment, this is a causal subgroup estimand. In the simulation, the CATE changes
+    with $x$ when the slider $\tau_X$ is not zero.
+    """)
     return
 
 
@@ -673,25 +572,22 @@ def _(continuous_cate_bins, data, np, plt, values):
     ax_cate_x.legend()
     fig_cate_x.tight_layout()
     fig_cate_x
-
-    return ax_cate_x, cate_bins, cate_curve, fig_cate_x, x_grid
+    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## 6. CATE as a function of a discrete pre-treatment variable
+    mo.md(r"""
+    ## 4. CATE as a function of a discrete pre-treatment variable
 
-        The discrete CATE is
+    The discrete CATE is
 
-        $$
-        CATE(g)=E[Y^1-Y^0\mid G=g].
-        $$
+    $$
+    CATE(g)=E[Y^1-Y^0\mid G=g].
+    $$
 
-        The two bars below are causal contrasts within two pre-treatment subpopulations.
-        """
-    )
+    The two bars below are causal contrasts within two pre-treatment subpopulations.
+    """)
     return
 
 
@@ -718,52 +614,52 @@ def _(data, plt):
     ax_cate_g.legend()
     fig_cate_g.tight_layout()
     fig_cate_g
-
-    return ax_cate_g, cate_g, fig_cate_g
-
-
-@app.cell(hide_code=True)
-def _(cate_g):
-    cate_g.round(3)
-    return
+    return (cate_g,)
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _(cate_g, mo):
     mo.md(
-        r"""
-        ## Takeaway
-
-        - $P(Y\mid A=a)$ is an observed conditional distribution. It describes the people who naturally received treatment level $a$.
-        - $P(Y\mid do(A=a))=P(Y^a)$ is a post-intervention distribution. It describes what would happen if everyone were set to treatment level $a$.
-        - $ATE=E[Y^1-Y^0]$ averages over the whole population.
-        - $CATE(x)$ and $CATE(g)$ are treatment-effect functions over pre-treatment subpopulations.
-        - $ATT=E[Y^1-Y^0\mid A=1]$ averages over the naturally treated population, so it can differ from the ATE when treatment effects are heterogeneous and treatment assignment is selective.
-        """
-    ).callout(kind="success")
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-        ## Running this notebook
-
-        From the directory containing this file:
-
-        ```bash
-        pip install marimo numpy pandas matplotlib
-        marimo edit causal_estimands_visual_simulation_marimo.py
-        ```
-
-        To serve it as an app instead of opening the notebook editor:
-
-        ```bash
-        marimo run causal_estimands_visual_simulation_marimo.py
-        ```
-        """
+        "<details>"
+        "<summary>Optional: show discrete CATE table</summary>"
+        + cate_g.round(3).to_html(index=False)
+        + "</details>"
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Student discussion prompts
+
+    1. **Set confounding strength to zero**. How close are the observed conditional curves $P(Y\mid A=a)$ to the interventional curves $P(Y^a)$?
+    2. **Increase confounding strength**. Is it $P(Y\mid A=a)$ the same as $P(Y\mid do(A=a))$? How about the ATE and the observed contrast?
+    3. **Set $\tau_X$ and $\tau_G$ to zero** with high confounding. How do ATE, ATT and ATC compare? What happens with the CATEs?
+    4. Feel free to try new configurations and to check the code and formulate questions.
+    5. In real data we do not observe both $Y^0$ and $Y^1$. Which objects, plots or tables in this simulation would no longer be directly available in real world?
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Running this notebook
+
+    From the directory containing this file:
+
+    ```bash
+    pip install marimo numpy pandas matplotlib
+    marimo edit 1_causal_estimands_visual_simulation_marimo.py
+    ```
+
+    To serve it as an app instead of opening the notebook editor:
+
+    ```bash
+    marimo run 1_causal_estimands_visual_simulation_marimo.py
+    ```
+    """)
     return
 
 

@@ -39,12 +39,12 @@ def _(mo):
     The target parameter follows the notation from the slides:
 
     \[
-    \psi = \mathbb{E}(Y^1 - Y^0).
+    \psi = E(Y^1 - Y^0).
     \]
 
     The observed data are \(O=(W,A,Y)\), the outcome regression is
-    \(Q(w,a)=\mathbb{E}(Y\mid W=w,A=a)\), and the propensity score is
-    \(\varpi(w)=\pi(1\mid w)=\mathbb{P}(A=1\mid W=w)\).
+    \(Q(w,a)=E(Y\mid W=w,A=a)\), and the propensity score is
+    \(\varpi(w)=\pi(1\mid w)=P(A=1\mid W=w)\).
 
     This lab is designed to be run as an app. Most code is hidden. Your task is to move the levers, run the estimators, and explain what happens.
     """)
@@ -476,6 +476,27 @@ def _(mo):
     3. Compare \(Q_1^{\mathrm{mis}}\) and \(Q_2^{\mathrm{mis}}\). In which way these models are misspecified? Does adding some interactions necessarily solve confounding bias? How would you specify a new outcome model so it does not suffer from the same issues?
     4. Explain why AIPW is not magic: what would happen if \(\widehat\pi\) is also misspecified or there are overlap issues? What diagnostic analysis and plots would make you choose between a plug-in or an AIPW? Remember that in real-world settings we **never observe the oracle** (broken line in plots above).
     5. Feel free to try new configurations and to check the code and formulate questions.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Running this notebook
+
+    From the directory containing this file:
+
+    ```bash
+    pip install marimo numpy pandas matplotlib
+    marimo edit 3b_aipw_double_robustness_marimo.py
+    ```
+
+    To serve it as an app instead of opening the notebook editor:
+
+    ```bash
+    marimo run 3b_aipw_double_robustness_marimo.py
+    ```
     """)
     return
 

@@ -48,12 +48,12 @@ def _(mo):
     **Goal.** Compare a misspecified plug-in estimator, a naive AIPW estimator, DML, and TMLE for the ATE
 
     \[
-    \psi = \mathbb{E}(Y^1-Y^0).
+    \psi = E(Y^1-Y^0).
     \]
 
     The observed data are \(O=(W,A,Y)\), the outcome regression is
-    \(Q(w,a)=\mathbb{E}(Y\mid W=w,A=a)\), and the propensity score is
-    \(\varpi(w)=\pi(1\mid w)=\mathbb{P}(A=1\mid W=w)\).
+    \(Q(w,a)=E(Y\mid W=w,A=a)\), and the propensity score is
+    \(\varpi(w)=\pi(1\mid w)=P(A=1\mid W=w)\).
 
     The point of this lab is not to debug code. The point is to see one practical difference between **ordinary AIPW** and **DML**:
 
@@ -660,6 +660,27 @@ def _(mo):
     5. Increase \(\lambda\). What happens to the confidence intervals? Relate this to the inverse-propensity terms in the influence function.
     6. In real data, the dashed oracle line is not available. Which diagnostics would you want to see to select one estimator?
     7. Feel free to try new configurations and to check the code and formulate questions.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Running this notebook
+
+    From the directory containing this file:
+
+    ```bash
+    pip install marimo numpy pandas matplotlib
+    marimo edit 4_dml_tmle_marimo.py
+    ```
+
+    To serve it as an app instead of opening the notebook editor:
+
+    ```bash
+    marimo run 4_dml_tmle_marimo.py
+    ```
     """)
     return
 
