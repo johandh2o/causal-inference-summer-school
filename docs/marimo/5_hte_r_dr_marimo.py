@@ -1120,12 +1120,17 @@ def _(mo):
     mo.md(r"""
     ## Student discussion prompts
 
-    1. **Clean reference**: set \(\rho=0\), \(\zeta=0\), and good overlap. Are all three CATE estimators close to the oracle curves?
-    2. **Outcome misspecification**: raise \(\rho\) while keeping \(\zeta=0\). Which estimator deteriorates most clearly?
-    3. **Wrong propensity, good outcome model, OK overlap**: set \(\rho=0\) and increase \(\zeta\). Wahich estimators change, and why does the outcome plug-in not directly react to \(\widehat\varpi\)?
-    4. **Wrong propensity, good outcome model, bad overlap**: set \(\rho=0\) and increase \(\zeta\) and \(\lambda\). Which estimators change, and how does the R-learner CATEs and the DR-learner CATEs compare? Does this show the double robustness property of the DR-learner? What about the R-learner?
-    5. Feel free to try new configurations and to check the code and formulate questions.
-    6. Feel free to revisit any prior Marimo lab.
+    1. **Start from a clean reference setting.** Set \(\rho=0\), \(\zeta=0\), and choose a setting with good overlap. Are the outcome plug-in, R-learner, and DR-learner all close to the oracle CATE curves?
+
+    2. **Introduce outcome and CATE-model misspecification.** Increase \(\rho\) while keeping \(\zeta=0\). Which estimator deteriorates most clearly? Why?
+
+    3. **Misspecify the propensity score but keep outcome features correct.** Set \(\rho=0\) and increase \(\zeta\), while keeping overlap reasonably good. Which estimators change? Why does the outcome plug-in not directly react to \(\widehat\varpi(W)\)?
+
+    4. **Combine propensity misspecification with weak overlap.** Set \(\rho=0\), then increase both \(\zeta\) and \(\lambda\). How do the R-learner and DR-learner CATE curves compare?
+
+    5. **Connect the behavior to double robustness.** In the previous setting, what does the DR-learner illustrate about double robustness? What does the R-learner lack by comparison?
+
+    6. Feel free to try new configurations, to check the code, to formulate questions, and **to revisit prior Marimo labs**.
     """)
     return
 

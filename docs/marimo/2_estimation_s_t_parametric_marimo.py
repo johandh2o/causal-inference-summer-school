@@ -1057,12 +1057,17 @@ def _(mo):
     mo.md(r"""
     ## Student discussion prompts
 
-    1. **Increase arm-specific CATE complexity**. Do the S- and T-learner ATE estimates and CATE curves separate? Why?
-    2. Reduce the sample size. Which estimator has the widest confidence intervals? Why?
-    3. **Set nonlinearity, heterogeneity and complexity to zero**. How does the ATE from the parametric model compare with the ATE from the S-learner and the T-learner? How does the CATE compare? Can the CATE be biased but the ATE not be?
-    4. Compare the $G=0$ and $G=1$ CATE plots. How do they change with different hyperparameter setups (nonlinearity, heterogeneity and complexity)?
-    5. Compare the parametric plug-in with the flexible learners. The parametric model includes $A$ interactions with all observed variables, but what nonlinear terms are still missing?
-    6. Feel free to try new configurations and to check the code and formulate questions.
+    1. **Make treatment-arm heterogeneity more complex.** Increase the arm-specific CATE complexity. Do the S-learner and T-learner start to produce different ATE estimates or CATE curves? What part of their strategies and weaknesses explains the divergence?
+
+    2. **Reduce the sample size.** Which estimator becomes most variable, and which one has the widest confidence intervals? How does this relate to fitting one outcome model versus fitting separate arm-specific outcome models?
+
+    3. **Start from a simple DGP.** Set nonlinearity, heterogeneity, and complexity to zero. How does the ATE from the parametric plug-in compare with the ATE from the S-learner and T-learner? How do their CATE curves compare? Can a CATE curve be misspecified even when the ATE is approximately correct?
+
+    4. **Compare heterogeneity by group.** Look separately at the \(G=0\) and \(G=1\) CATE plots. How do the curves change as you increase nonlinearity, heterogeneity, or arm-specific complexity? Which learner seems more sensitive to each lever?
+
+    5. **Design your own stress test.** Try new combinations of the levers. Can you create a setting where two learners give similar ATEs but very different CATE curves? What does that teach us about evaluating heterogeneous treatment-effect estimators?
+
+    6. Feel free to try new configurations, to check the code, and to formulate questions.
     """)
     return
 

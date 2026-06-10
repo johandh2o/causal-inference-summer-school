@@ -633,11 +633,17 @@ def _(mo):
     mo.md(r"""
     ## Student discussion prompts
 
-    1. **Set confounding strength to zero**. How close are the observed conditional curves $P(Y\mid A=a)$ to the interventional curves $P(Y^a)$?
-    2. **Increase confounding strength**. Is it $P(Y\mid A=a)$ the same as $P(Y\mid do(A=a))$? How about the ATE and the observed contrast?
-    3. **Set $\tau_X$ and $\tau_G$ to zero** with high confounding. How do ATE, ATT and ATC compare? What happens with the CATEs?
-    4. Feel free to try new configurations and to check the code and formulate questions.
-    5. In real data we do not observe both $Y^0$ and $Y^1$. Which objects, plots or tables in this simulation would no longer be directly available in real world?
+    1. **Start with no confounding.** Set the confounding-strength lever to zero. How similar are the observed conditional curves \(P(Y\mid A=a)\) and the interventional curves \(P(Y^a)\)? What does this tell us about adjustment when treatment is effectively randomized?
+
+    2. **Increase confounding.** As confounding becomes stronger, does \(P(Y\mid A=a)\) still behave like \(P(Y\mid do(A=a))\)? Compare the true ATE with the naive observed contrast. Where does the difference come from?
+
+    3. **Remove effect heterogeneity but keep strong confounding.** Set \(\tau_X\) and \(\tau_G\) to zero while keeping confounding high. How do the ATE, ATT, and ATC compare? What happens to the estimated CATE curves, and why?
+
+    4. **Explore your own scenarios.** Try changing several levers at once. Can you construct a setting where the observed data are visually misleading about the causal effect? What feature of the DGP explains the discrepancy?
+
+    5. **Connect the simulation to real data.** In this simulation we can see both \(Y^0\) and \(Y^1\), but in real data we only observe one of them for each unit. Which curves, tables, or oracle quantities shown here would no longer be directly observable in a real-world study?
+
+    6. Feel free to try new configurations, to check the code, and to formulate questions.
     """)
     return
 

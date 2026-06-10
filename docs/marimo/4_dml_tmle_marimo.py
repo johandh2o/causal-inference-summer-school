@@ -653,13 +653,17 @@ def _(mo):
     mo.md(r"""
     ## Student discussion prompts
 
-    1. Set \(\kappa=1\) and **use the true propensity scores**. Why can the naïve AIPW estimator be biased even though it uses the correct propensity score? What happened to the in-sample residuals? What happened to the confidence intervals?
-    2. How do the AIPW and DML compare for different \(\kappa\), low and high?
-    3. **Switch from true to misspecified propensity scores**. Which estimators change? Why does the plug-in not change?
-    4. With misspecified propensity scores, how do the estimators perform?
-    5. Increase \(\lambda\). What happens to the confidence intervals? Relate this to the inverse-propensity terms in the influence function.
-    6. In real data, the dashed oracle line is not available. Which diagnostics would you want to see to select one estimator?
-    7. Feel free to try new configurations and to check the code and formulate questions.
+    1. **Turn on outcome-model overfitting.** Set \(\kappa=1\) and use the true propensity scores. Why can the naive AIPW estimator still be biased even when \(\pi(W)\) is correct? What happens to the in-sample residuals used in the correction term, and how does this affect the confidence intervals?
+
+    2. **Compare naive AIPW with DML.** Vary \(\kappa\) from low to high. When do naive AIPW and DML give similar answers, and when do they separate? What role does sample splitting or cross-fitting play in this comparison?
+
+    3. **Change the propensity-score input.** Switch from true propensity scores to misspecified estimated propensity scores. Which estimators change, and which ones do not? Why is the plug-in estimator unaffected by this switch?
+
+    4. **Study double robustness under stress.** When the propensity score is misspecified, how well do the estimators perform given that the outcome-model is misspecified too? In which settings would AIPW/DML/TMLE help?
+
+    5. **Create overlap problems.** Increase \(\lambda\) with correct propensity scores. What happens to the width of the confidence intervals and the stability of the estimates? Relate this to the inverse-propensity terms in the influence function.
+
+    6. Feel free to try new configurations, to check the code, and to formulate questions.
     """)
     return
 

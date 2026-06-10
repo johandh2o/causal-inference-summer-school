@@ -470,12 +470,21 @@ def _(mo):
     mo.md(r"""
     ## Student discussion prompts
 
-    1. Increase \(\rho\) to add **more misspecification**. Which estimators react most strongly to outcome-regression misspecification?
-    2. Increase \(\lambda\) to **add more overlap problems**. What happens to the confidence intervals of the AIPW estimators? Relate this to the terms
-       \(A/\widehat\pi(1\mid W)\) and \((1-A)/(1-\widehat\pi(0\mid W))\) in the one-step correction.
-    3. Compare \(Q_1^{\mathrm{mis}}\) and \(Q_2^{\mathrm{mis}}\). In which way these models are misspecified? Does adding some interactions necessarily solve confounding bias? How would you specify a new outcome model so it does not suffer from the same issues?
-    4. Explain why AIPW is not magic: what would happen if \(\widehat\pi\) is also misspecified or there are overlap issues? What diagnostic analysis and plots would make you choose between a plug-in or an AIPW? Remember that in real-world settings we **never observe the oracle** (broken line in plots above).
-    5. Feel free to try new configurations and to check the code and formulate questions.
+    1. **Increase outcome-model misspecification.** Raise \(\rho\) so that the fitted outcome regressions become increasingly misspecified. Which estimators change the most? Which ones are more stable, and why?
+
+    2. **Create overlap problems.** Increase \(\lambda\) so that some units have very small or very large estimated propensity scores. What happens to the confidence intervals of the AIPW estimators? Relate this behavior to the inverse-propensity terms in the one-step correction:
+    \[
+    \frac{A}{\widehat\pi(1\mid W)}
+    \qquad\text{and}\qquad
+    \frac{1-A}{\widehat\pi(0\mid W)}
+    \]
+    3. **Compare the two misspecified outcome models.** Look at \(Q_1^{\mathrm{mis}}\) and \(Q_2^{\mathrm{mis}}\). What information is each model missing? What would a better outcome model need to include?
+
+    4. **Discuss why AIPW is not automatic protection.** AIPW can correct some outcome-regression mistakes when the propensity score is well estimated, but what happens if \(\widehat\pi\) is also misspecified or if overlap is weak? Which diagnostics or plots would help you decide whether to trust a plug-in estimator, an AIPW estimator, or neither? Remember that in real data we do not observe the oracle curve shown as the dashed line.
+
+    5. **Design your own stress test.** Try new combinations of \(\rho\), \(\lambda\), and the outcome-model choices. Can you find a setting where AIPW improves over plug-in? Can you find a setting where AIPW becomes unstable? What feature of the simulation explains each case?
+
+    6. Feel free to try new configurations, to check the code, and to formulate questions.
     """)
     return
 
