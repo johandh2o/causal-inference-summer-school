@@ -68,7 +68,9 @@ By the end of the course, students should be able to:
 - [Day 2 notebook (to download from Github)](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/notebooks/day2.ipynb)
 - [Day 2 notebook (to use Colab save it in your Google Drive)](https://colab.research.google.com/drive/1ekSuRUQBlU4BbkRslk16m61OhkvQyPVS?usp=sharing)
 - [Day 3 slides](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/slides/day3.pdf)
-- Day 4
+- [Day 4 slides](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/slides/day4.pdf)
+- [Day 4 notebook (to download from Github)](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/notebooks/day4_PC_exercise.ipynb)
+- [Day 4 notebook (to use Colab save it in your Google Drive)](https://drive.google.com/file/d/1nMe9XSa1h-CcJUxl_a3gGIUcUornkJKu/view?usp=sharing)
 
 ## Recommended readings
 
