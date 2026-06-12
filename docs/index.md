@@ -80,8 +80,6 @@ Each project should include a final report containing:
 - Simulations, theoretical analysis, or a critical discussion, depending on the selected option.
 - A short conclusion summarizing what was learned.
 
-A LaTeX template for the final report will be made available on the course website. Information about more detailed evaluation criteria and the policy for the use of LLMs will be provided during the course.
-
 ## Learning objectives
 
 By the end of the course, students should be able to:
