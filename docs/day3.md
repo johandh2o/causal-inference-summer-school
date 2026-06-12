@@ -38,6 +38,16 @@ By the end of this session, students should be able to:
 | 15:30--16:00 | Heterogeneous treatment effect  |   |
 | 16:00--16:30 | Heterogeneous treatment effect  | [Marimo lab](https://molab.marimo.io/github/johandh2o/causal-inference-summer-school/blob/main/docs/marimo/5_hte_r_dr_marimo.py/wasm)  |
 
+## Computational setup
+
+Students should have a working Python 3.11 or 3.12 environment. We will use the following libraries:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install numpy pandas scipy scikit-learn matplotlib statsmodels jupyterlab marimo pgmpy
+```
+
 ## Advanced readings
 
 - Robins, J. M., Rotnitzky, A., & Zhao, L. P. (1994). [Estimation of regression coefficients when some regressors are not always observed](https://www.jstor.org/stable/2290910). *Journal of the American Statistical Association*, 89(427), 846--866. doi:10.1080/01621459.1994.10476818

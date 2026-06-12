@@ -26,6 +26,62 @@ A central goal of the course is to help students formulate causal questions prec
 - [Prof. Johan Pensar](https://www.mn.uio.no/math/english/people/aca/johanpen/), Statistics and Data Science (Dept. of Mathematics), University of Oslo.
 - [Johan de Aguas](https://johandh2o.github.io), Statistics and Data Science (Dept. of Mathematics), University of Oslo.
 
+## Final project
+
+To complete the summer school, students will be asked to develop a project in the field of **causality and machine learning**. Students may work **individually** or **in pairs**. The final submission should be a PDF report including the project title and the name(s) of the student(s). The main text should describe the problem, the methods used, and the results obtained.
+
+Reports should be at most **8 pages**, excluding the bibliography, and must be submitted by **August 16, 2026** to [fabio.zennaro@uib.no](mailto:fabio.zennaro@uib.no).
+
+We envision three main types of projects, which may focus **on one or several of the topics covered across the different days of the course**.
+
+#### Option A: Benchmark-based comparison of causal methods
+
+Students may work with a publicly available benchmark dataset. The goal is to compare different causal learning or estimation methods discussed during the course. Students are encouraged to discuss practical issues such as model misspecification, nuisance estimation, overlap, finite-sample behavior, and sensitivity to tuning choices.
+
+Benchmark data include for instance:
+
+- For causal discovery: [Bayesian network repository](https://www.bnlearn.com/bnrepository/).
+- For benchmark estimation: [ACIC data challenge 2019](https://sites.google.com/view/acic2019datachallenge/data-challenge) and [IHDP / Jobs datasets](https://ieee-dataport.org/documents/treatment-effect-estimation-benchmarks).
+- For physical data testbed: [Causal Chambers](https://github.com/juangamella/causal-chamber).
+
+#### Option B: Bring your own data and formulate a causal analysis problem
+
+Students may bring their own dataset, or use a dataset from their field of interest, and formulate a causal question that can be studied using the tools from the course. The project should clearly define the learning goal. For instance, for estimation this includes specifying treatment, outcome, covariates, target population, and causal estimand. The main emphasis should be on translating a substantive question into a precise causal problem, rather than only on obtaining numerical results.
+
+You are also welcome to define your own causal question and choose an appropriate method. Some possible directions include:
+
+- Applying your data to a transportability problem, as in [this paper](https://www.biorxiv.org/content/10.64898/2026.03.03.709251v1.full.pdf).
+- Applying your data to an interpretability problem, as in [this paper](https://arxiv.org/abs/2503.14442).
+- Applying your data to a discrimination or fairness problem, as in [this paper](https://arxiv.org/abs/2501.08429).
+
+#### Option C: Reproduce, implement, or extend a causal machine learning paper
+
+Students may choose a paper on causal graphical models, causal inference, or causal machine learning, and work on reproducing, implementing, or extending some of its main ideas. This may involve coding the proposed method, reproducing a simulation study, applying the method to a new dataset, or critically analyzing the assumptions and theoretical results. Students may also focus on a theoretical or mathematical problem inspired by the paper.
+
+For instance, you can read and re-implement a method from the causal machine learning literature, and apply it either to toy/simulated data or to your own data. Some suggested directions are:
+
+- [Causal Bayesian optimization](https://arxiv.org/abs/2005.11741).
+- [Neural causal models](https://arxiv.org/abs/2107.00793).
+- [Causal invariant prediction](https://arxiv.org/abs/1501.01332).
+- [NOTEARS](https://arxiv.org/abs/1803.01422).
+- [CEVAE](https://arxiv.org/pdf/1705.08821).
+- [Dragonnet](https://arxiv.org/pdf/1906.02120).
+- [CAlearning](https://arxiv.org/abs/2301.05893).
+- [MABUCs](https://proceedings.neurips.cc/paper/2015/hash/795c7a7a5ec6b460ec00c5841019b9e9-Abstract.html).
+- [CausalDQN](https://arxiv.org/abs/2510.21110)..
+
+#### All Options
+
+Each project should include a final report containing:
+
+- A clear statement of the causal question or methodological problem.
+- A discussion of the assumptions for identification, estimation, learning, and interpretation.
+- A description of the methods used.
+- Simulations, theoretical analysis, or a critical discussion, depending on the selected option.
+- A short conclusion summarizing what was learned.
+
+A LaTeX template for the final report will be made available on the course website. Information about more detailed evaluation criteria and the policy for the use of LLMs will be provided during the course.
+
 ## Learning objectives
 
 By the end of the course, students should be able to:
@@ -97,49 +153,6 @@ Here is a list of references, including papers and textbooks, covering the topic
 
 - Koller, D., & Friedman, N. (2009). [Probabilistic Graphical Models: Principles and Techniques](http://mcb111.org/w06/KollerFriedman.pdf) (**chapters 16--18, 21**). MIT Press.
 
-## Computational setup
-
-Students should have a working Python 3.11 or 3.12 environment. We will use the following libraries:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install numpy pandas scipy scikit-learn matplotlib statsmodels jupyterlab marimo pgmpy
-```
-
-## Final project
-
-To complete the summer school, students will be asked to develop a project in the field of **causality and machine learning**. Depending on the scope of the project, students may work individually or in pairs; however, each student must submit an individual final report.
-
-We envision three main types of projects, which may focus **on one or several of the topics covered across the different days of the course**.
-
-#### Option A: Benchmark-based comparison of causal methods
-
-Students may work with a publicly available benchmark dataset. The goal is to compare different causal learning or estimation methods discussed during the course. Students are encouraged to discuss practical issues such as model misspecification, nuisance estimation, overlap, finite-sample behavior, and sensitivity to tuning choices.
-
-Benchmark data include for instance:
-
-- For causal discovery: [Bayesian network repository](https://www.bnlearn.com/bnrepository/).
-- For benchmark estimation: [ACIC data challenge 2019](https://sites.google.com/view/acic2019datachallenge/data-challenge) and [IHDP / Jobs datasets](https://ieee-dataport.org/documents/treatment-effect-estimation-benchmarks).
-- For physical data testbed: [Causal Chambers](https://github.com/juangamella/causal-chamber).
-
-#### Option B: Bring your own data and formulate a causal analysis problem
-
-Students may bring their own dataset, or use a dataset from their field of interest, and formulate a causal question that can be studied using the tools from the course. The project should clearly define the learning goal. For instance, for estimation this includes specifying treatment, outcome, covariates, target population, and causal estimand. The main emphasis should be on translating a substantive question into a precise causal problem, rather than only on obtaining numerical results.
-
-#### Option C: Reproduce, implement, or extend a causal machine learning paper
-
-Students may choose a paper on causal graphical models, causal inference, or causal machine learning, and work on reproducing, implementing, or extending some of its main ideas. This may involve coding the proposed method, reproducing a simulation study, applying the method to a new dataset, or critically analyzing the assumptions and theoretical results. Students may also focus on a theoretical or mathematical problem inspired by the paper.
-
-Each project should include a final report containing:
-
-- A clear statement of the causal question or methodological problem.
-- A discussion of the assumptions for identification, estimation, learning, and interpretation.
-- A description of the methods used.
-- Simulations, theoretical analysis, or a critical discussion, depending on the selected option.
-- A short conclusion summarizing what was learned.
-
-A LaTeX template for the final report will be made available on the course website. Information about more detailed evaluation criteria and the policy for the use of LLMs will be provided during the course.
 
 ## Instructions for registering the credits
 
