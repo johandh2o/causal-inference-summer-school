@@ -68,7 +68,7 @@ For instance, you can read and re-implement a method from the causal machine lea
 - [Dragonnet](https://arxiv.org/pdf/1906.02120).
 - [CAlearning](https://arxiv.org/abs/2301.05893).
 - [MABUCs](https://proceedings.neurips.cc/paper/2015/hash/795c7a7a5ec6b460ec00c5841019b9e9-Abstract.html).
-- [CausalDQN](https://arxiv.org/abs/2510.21110)..
+- [CausalDQN](https://arxiv.org/abs/2510.21110).
 
 #### All Options
 
