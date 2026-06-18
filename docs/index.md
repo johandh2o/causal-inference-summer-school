@@ -30,7 +30,10 @@ A central goal of the course is to help students formulate causal questions prec
 
 To complete the summer school, students will be asked to develop a project in the field of **causality and machine learning**. Students may work **individually** or **in pairs**. The final submission should be a PDF report including the project title and the name(s) of the student(s). The main text should describe the problem, the methods used, and the results obtained.
 
-Reports should be at most **8 pages**, excluding the bibliography, and must be submitted by **August 16, 2026** to [fabio.zennaro@uib.no](mailto:fabio.zennaro@uib.no).
+Reports should be in PDF file of at most **8 pages**, excluding the bibliography, and must be submitted by **August 16, 2026** to [fabio.zennaro@uib.no](mailto:fabio.zennaro@uib.no). Templates can be found here:
+
+- [LaTeX template](https://www.overleaf.com/read/pjrkfrddjbbv#e4e1e1): download the .bib, .tex and .sty files and run locally, or copy as your own OverLeaf project,
+- [Docs/Word templeate](https://docs.google.com/document/d/1wDBWCcGNmpZ7VZM_NyDAsuqyQ_Pa-HA4/edit?usp=sharing&ouid=111855812032311307193&rtpof=true&sd=true): download the .docx file, or copy into your own Google Docs.
 
 We envision three main types of projects, which may focus **on one or several of the topics covered across the different days of the course**.
 
