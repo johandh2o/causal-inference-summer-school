@@ -120,6 +120,7 @@ By the end of the course, students should be able to:
 | 4 | Learning beyond equivalence classes | Prof. Pekka Parviainen |
 
 ## Slides and notebooks
+- [Day 1 slides (with solutions)](https://www.mn.uio.no/math/english/people/aca/johanpen/nora_summer_course_2026___causality.pdf)
 - [Day 1 slides](https://www.mn.uio.no/math/english/people/aca/johanpen/nora-2025-day1.pdf)
 - [Day 2 slides](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/slides/day2.pdf) 
 - [Day 2 notebook (to download from Github)](https://github.com/johandh2o/causal-inference-summer-school/blob/main/docs/notebooks/day2.ipynb)
